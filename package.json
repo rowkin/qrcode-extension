@@ -1,0 +1,31 @@
+{
+  "name": "qrcode-extension",
+  "version": "1.0.0",
+  "description": "A simple and user-friendly Chrome extension for quickly generating QR codes from current page URLs, selected text, or links.",
+  "main": "background.js",
+  "scripts": {
+    "clean": "git clean -df && git checkout -- .",
+    "check-git": "node build/check-git-status.js",
+    "build": "bash ./scripts/bump_version.sh",
+    "postinstall": "npm run check-node-version",
+    "check-node-version": "node -e \"if (process.versions.node.split('.')[0] < 14) { console.error('Requires Node.js 14+'); process.exit(1); }\""
+  },
+  "keywords": [
+    "chrome-extension",
+    "qrcode",
+    "url-to-qrcode",
+    "text-to-qrcode",
+    "chrome",
+    "extension",
+    "manifest-v3"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/mdsfe/qrcode-extension"
+  },
+  "author": "mdsfe",
+  "license": "ISC",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

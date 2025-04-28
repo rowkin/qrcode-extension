@@ -1,0 +1,50 @@
+{
+  "extName": {
+    "message": "QR Code Generator",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Generate QR code from selected URL, text or current page.",
+    "description": "Extension description"
+  },
+  "contextMenuTitle": {
+    "message": "Generate QR Code",
+    "description": "Context menu item title"
+  },
+  "copyButtonText": {
+    "message": "Copy",
+    "description": "Copy button text"
+  },
+  "copiedText": {
+    "message": "Copied",
+    "description": "Text shown after successful copy"
+  },
+  "copyFailedText": {
+    "message": "Copy failed",
+    "description": "Text shown when copy fails"
+  },
+  "clickToSelectText": {
+    "message": "Click to select",
+    "description": "Tooltip for URL text"
+  },
+  "generateFailedText": {
+    "message": "QR code generation failed",
+    "description": "Error message when QR code generation fails"
+  },
+  "downloadQRCode": {
+    "message": "Download QR Code",
+    "description": "Tooltip for download button"
+  },
+  "downloadSuccess": {
+    "message": "Download successful",
+    "description": "Message shown after successful download"
+  },
+  "downloadFailed": {
+    "message": "Download failed",
+    "description": "Message shown when download fails"
+  },
+  "loadingText": {
+    "message": "Generating QR Code...",
+    "description": "Text shown while generating QR code"
+  }
+}

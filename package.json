@@ -27,5 +27,11 @@
   "license": "ISC",
   "engines": {
     "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "chalk": "^4.1.2",
+    "clean-css": "^5.3.3",
+    "html-minifier": "^4.0.0",
+    "terser": "^5.39.0"
   }
 }

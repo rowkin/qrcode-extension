@@ -16,6 +16,22 @@ check_file() {
     fi
 }
 
+# 函数：加载配置文件
+load_config() {
+    local config_file="$ROOT_DIR/.extensionrc"
+    if [ -f "$config_file" ]; then
+        echo "Loading configuration from .extensionrc..."
+        local config=$(node -e "
+            const { loadConfig } = require('./scripts/config.js');
+            console.log(JSON.stringify(loadConfig('$ROOT_DIR')));
+        ")
+        echo "$config"
+    else
+        echo "No .extensionrc found, using default configuration..."
+        echo "{}"
+    fi
+}
+
 # 函数：更新manifest.json版本号
 update_manifest_version() {
     local version="$1"
@@ -36,54 +52,90 @@ update_manifest_version() {
 # 函数：创建发布包
 create_release_package() {
     local version="$1"
-    local dist_dir="$ROOT_DIR/dist"
-    local release_dir="$dist_dir/qrcode-extension-v$version"
-    local zip_file="$dist_dir/qrcode-extension-v$version.zip"
+    local config=$(load_config)
+    
+    # 从配置中获取值
+    local dist_dir="$ROOT_DIR/$(echo "$config" | jq -r '.output.directory // "dist"')"
+    local name="$(echo "$config" | jq -r '.name // "qrcode-extension"')"
+    local release_dir="$dist_dir/$name-v$version"
+    local zip_file="$dist_dir/$name-v$version.zip"
     
     echo "Creating release package..."
     
-    # 创建发布目录
-    rm -rf "$dist_dir"
+    # 清理输出目录
+    if [ "$(echo "$config" | jq -r '.output.clean // true')" = "true" ]; then
+        rm -rf "$dist_dir"
+    fi
     mkdir -p "$release_dir"
     
-    # 复制必需文件
+    # 复制文件
     echo "Copying files..."
-    cp "$ROOT_DIR/manifest.json" "$release_dir/"
-    cp "$ROOT_DIR/background.js" "$release_dir/"
-    cp "$ROOT_DIR/content-script.js" "$release_dir/"
-    cp "$ROOT_DIR/popup.js" "$release_dir/"
     
-    # 复制库文件
-    if [ -d "$ROOT_DIR/lib" ]; then
-        cp -r "$ROOT_DIR/lib" "$release_dir/"
-    fi
+    # 从配置中获取文件列表
+    local required_files=($(echo "$config" | jq -r '.files.required[]'))
+    local optional_files=($(echo "$config" | jq -r '.files.optional[]'))
+    local directories=($(echo "$config" | jq -r '.files.directories[]'))
+    local docs=($(echo "$config" | jq -r '.files.documentation[]'))
     
-    # 复制多语言文件
-    if [ -d "$ROOT_DIR/_locales" ]; then
-        cp -r "$ROOT_DIR/_locales" "$release_dir/"
-    fi
+    # 复制必需文件
+    for file in "${required_files[@]}"; do
+        if [ -f "$ROOT_DIR/$file" ]; then
+            echo "Copying required file: $file"
+            cp "$ROOT_DIR/$file" "$release_dir/"
+        else
+            echo "Error: Required file $file not found!"
+            exit 1
+        fi
+    done
     
-    # 复制图标
-    if [ -d "$ROOT_DIR/icons" ]; then
-        cp -r "$ROOT_DIR/icons" "$release_dir/"
-    fi
+    # 复制可选文件
+    for file in "${optional_files[@]}"; do
+        if [ -f "$ROOT_DIR/$file" ]; then
+            echo "Copying optional file: $file"
+            cp "$ROOT_DIR/$file" "$release_dir/"
+        else
+            echo "Note: Optional file $file not found, skipping..."
+        fi
+    done
+    
+    # 复制目录
+    for dir in "${directories[@]}"; do
+        if [ -d "$ROOT_DIR/$dir" ]; then
+            echo "Copying directory: $dir"
+            cp -r "$ROOT_DIR/$dir" "$release_dir/"
+        else
+            echo "Note: Directory $dir not found, skipping..."
+        fi
+    done
     
     # 复制文档
-    cp "$ROOT_DIR/README.md" "$release_dir/"
-    cp "$ROOT_DIR/README-zh.md" "$release_dir/"
+    for doc in "${docs[@]}"; do
+        if [ -f "$ROOT_DIR/$doc" ]; then
+            echo "Copying documentation: $doc"
+            cp "$ROOT_DIR/$doc" "$release_dir/"
+        fi
+    done
     
-    # 创建 zip 文件
-    echo "Creating zip archive..."
+    # 如果启用了压缩
+    if [ "$(echo "$config" | jq -r '.minify.js.enabled // false')" = "true" ] || \
+       [ "$(echo "$config" | jq -r '.minify.html.enabled // false')" = "true" ] || \
+       [ "$(echo "$config" | jq -r '.minify.css.enabled // false')" = "true" ]; then
+        echo "Minifying files..."
+        node scripts/minify.js "$release_dir" "$config"
+    fi
+    
+    # 创建压缩包
+    echo "Creating archive..."
     cd "$dist_dir"
-    zip -r "$zip_file" "qrcode-extension-v$version"
+    zip -r "$zip_file" "$(basename "$release_dir")"
     
-    echo "Release package created: $zip_file"
+    # 显示结果
+    echo "Package contents:"
+    unzip -l "$zip_file"
     
-    # 显示包大小
     local size=$(du -h "$zip_file" | cut -f1)
     echo "Package size: $size"
     
-    # 计算 MD5
     if command -v md5sum >/dev/null 2>&1; then
         echo "MD5: $(md5sum "$zip_file" | cut -d' ' -f1)"
     elif command -v md5 >/dev/null 2>&1; then

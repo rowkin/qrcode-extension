@@ -1,0 +1,83 @@
+{
+  "name": "qrcode-extension",
+  "files": {
+    "required": [
+      "manifest.json",
+      "popup.html",
+      "popup.js",
+      "qrcode.min.js"
+    ],
+    "optional": [
+      "background.js",
+      "content-script.js"
+    ],
+    "directories": [
+      "icons",
+      "_locales",
+      "lib",
+      "styles"
+    ],
+    "documentation": [
+      "README.md",
+      "README-zh.md",
+      "LICENSE"
+    ]
+  },
+  "minify": {
+    "js": {
+      "enabled": true,
+      "options": {
+        "compress": {
+          "dead_code": true,
+          "drop_console": true,
+          "drop_debugger": true,
+          "pure_funcs": ["console.log"]
+        },
+        "mangle": {
+          "toplevel": true,
+          "properties": false
+        },
+        "output": {
+          "beautify": false,
+          "comments": "some"
+        }
+      },
+      "excludes": [
+        "qrcode.min.js"
+      ]
+    },
+    "html": {
+      "enabled": true,
+      "options": {
+        "removeComments": true,
+        "collapseWhitespace": true,
+        "minifyJS": true,
+        "minifyCSS": true,
+        "removeAttributeQuotes": true
+      }
+    },
+    "css": {
+      "enabled": true,
+      "options": {
+        "level": 2,
+        "format": "keep-breaks"
+      }
+    }
+  },
+  "output": {
+    "directory": "dist",
+    "format": "zip",
+    "sourceMap": false,
+    "clean": true
+  },
+  "version": {
+    "files": [
+      "package.json",
+      "manifest.json"
+    ],
+    "tag": {
+      "enabled": true,
+      "prefix": "v"
+    }
+  }
+}

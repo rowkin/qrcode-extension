@@ -56,3 +56,6 @@ coverage/
 # 其他
 manifest.json.backup
 *.bak
+screenshots/
+build/
+scripts/

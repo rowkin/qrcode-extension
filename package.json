@@ -8,6 +8,8 @@
     "check-git": "node build/check-git-status.js",
     "build": "bash ./scripts/bump_version.sh",
     "build:debug": "bash -x ./scripts/bump_version.sh",
+    "build:pack": "bash ./scripts/bump_version.sh --pack-only",
+    "build:pack:debug": "bash -x ./scripts/bump_version.sh --pack-only",
     "postinstall": "npm run check-node-version",
     "check-node-version": "node -e \"if (process.versions.node.split('.')[0] < 14) { console.error('Requires Node.js 14+'); process.exit(1); }\""
   },

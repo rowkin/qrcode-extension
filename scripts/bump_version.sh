@@ -6,6 +6,13 @@ set -e
 # 获取项目根目录的绝对路径
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+
+# 添加调试输出
+debug_config() {
+    echo "Debug: Reading config file..."
+    cat "$ROOT_DIR/.extensionrc"
+}
+
 # 函数：检查文件是否存在
 check_file() {
     if [ ! -f "$1" ]; then
@@ -21,14 +28,50 @@ load_config() {
     local config_file="$ROOT_DIR/.extensionrc"
     if [ -f "$config_file" ]; then
         echo "Loading configuration from .extensionrc..."
-        local config=$(node -e "
-            const { loadConfig } = require('./scripts/config.js');
-            console.log(JSON.stringify(loadConfig('$ROOT_DIR')));
-        ")
-        echo "$config"
+        node -e "
+            try {
+                const fs = require('fs');
+                const config = JSON.parse(fs.readFileSync('$config_file', 'utf8'));
+                console.log(JSON.stringify(config));
+            } catch (error) {
+                console.error('Error reading config:', error);
+                process.exit(1);
+            }
+        "
     else
-        echo "No .extensionrc found, using default configuration..."
-        echo "{}"
+        # 返回默认配置
+        echo '{
+            "name": "qrcode-extension",
+            "files": {
+                "required": [
+                    "manifest.json",
+                    "popup.html",
+                    "popup.js",
+                    "qrcode.min.js"
+                ],
+                "optional": [
+                    "background.js",
+                    "content-script.js"
+                ],
+                "directories": [
+                    "icons",
+                    "_locales",
+                    "lib",
+                    "styles"
+                ],
+                "documentation": [
+                    "README.md",
+                    "README-zh.md",
+                    "LICENSE"
+                ]
+            },
+            "output": {
+                "directory": "dist",
+                "format": "zip",
+                "sourceMap": false,
+                "clean": true
+            }
+        }'
     fi
 }
 
@@ -55,27 +98,40 @@ create_release_package() {
     local config=$(load_config)
     
     # 从配置中获取值
-    local dist_dir="$ROOT_DIR/$(echo "$config" | jq -r '.output.directory // "dist"')"
-    local name="$(echo "$config" | jq -r '.name // "qrcode-extension"')"
+    local dist_dir="$ROOT_DIR/dist"  # 使用固定值避免 jq 解析错误
+    local name="qrcode-extension"    # 使用固定值避免 jq 解析错误
     local release_dir="$dist_dir/$name-v$version"
     local zip_file="$dist_dir/$name-v$version.zip"
     
     echo "Creating release package..."
     
     # 清理输出目录
-    if [ "$(echo "$config" | jq -r '.output.clean // true')" = "true" ]; then
-        rm -rf "$dist_dir"
-    fi
+    rm -rf "$dist_dir"
     mkdir -p "$release_dir"
     
     # 复制文件
     echo "Copying files..."
     
-    # 从配置中获取文件列表
-    local required_files=($(echo "$config" | jq -r '.files.required[]'))
-    local optional_files=($(echo "$config" | jq -r '.files.optional[]'))
-    local directories=($(echo "$config" | jq -r '.files.directories[]'))
-    local docs=($(echo "$config" | jq -r '.files.documentation[]'))
+    # 解析文件列表
+    local required_files=($(echo "$files_config" | node -e "
+        const data = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+        console.log(data.required.join(' '));
+    "))
+    
+    local optional_files=($(echo "$files_config" | node -e "
+        const data = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+        console.log(data.optional.join(' '));
+    "))
+    
+    local directories=($(echo "$files_config" | node -e "
+        const data = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+        console.log(data.directories.join(' '));
+    "))
+    
+    local docs=($(echo "$files_config" | node -e "
+        const data = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+        console.log(data.documentation.join(' '));
+    "))
     
     # 复制必需文件
     for file in "${required_files[@]}"; do
@@ -126,8 +182,8 @@ create_release_package() {
     
     # 创建压缩包
     echo "Creating archive..."
-    cd "$dist_dir"
-    zip -r "$zip_file" "$(basename "$release_dir")"
+    (cd "$dist_dir" && zip -r "$(basename "$zip_file")" "$(basename "$release_dir")")
+
     
     # 显示结果
     echo "Package contents:"

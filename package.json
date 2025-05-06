@@ -1,6 +1,6 @@
 {
   "name": "qrcode-extension",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A simple and user-friendly Chrome extension for quickly generating QR codes from current page URLs, selected text, or links.",
   "main": "background.js",
   "scripts": {

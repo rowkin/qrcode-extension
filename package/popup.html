@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title data-i18n="extName">QR Code Generator</title>
+  <style>
+    body {
+      width: 350px;
+      padding: 20px;
+      text-align: center;
+    }
+    #qrcode {
+      margin: 20px auto;
+    }
+    #url-display {
+      word-break: break-all;
+      margin: 10px 0;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+  <script src="qrcode.min.js"></script>
+  <script src="popup.js"></script>
+</head>
+<body>
+  <div id="qrcode"></div>
+  <div id="url-display"></div>
+</body>
+</html>

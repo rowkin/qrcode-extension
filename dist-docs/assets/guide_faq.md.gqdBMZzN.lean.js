@@ -1,0 +1,1 @@
+import{_ as a,c as i,o as e,ag as o}from"./chunks/framework.dvv-DFtf.js";const c=JSON.parse('{"title":"常见问题","description":"","frontmatter":{},"headers":[],"relativePath":"guide/faq.md","filePath":"guide/faq.md"}'),r={name:"guide/faq.md"};function t(h,l,n,s,q,u){return e(),i("div",null,[...l[0]||(l[0]=[o("",85)])])}const p=a(r,[["render",t]]);export{c as __pageData,p as default};

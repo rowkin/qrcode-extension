@@ -37,6 +37,19 @@ temp/
 *.tmp
 *.temp
 
+# 打包文件
+*.zip
+*.zip.backup
+*.tgz
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.lzma
+*.tar.lz
+*.tar.z
+*.tar.bz
+*.tar.bz2
+
 # Git 忽略文件
 .git/
 *.orig

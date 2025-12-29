@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二维码生成器 Chrome 扩展 - 文档</title>
+    <meta name="description" content="一个简单易用的 Chrome 扩展，可以快速为当前页面 URL、选中文本或链接生成二维码">
+    <meta name="keywords" content="Chrome扩展,二维码生成器,QR Code,浏览器插件">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1>二维码生成器</h1>
+                <p class="tagline">Chrome 扩展文档</p>
+            </div>
+            <nav class="nav">
+                <a href="#home" class="nav-link active">首页</a>
+                <a href="#getting-started" class="nav-link">快速开始</a>
+                <a href="#features" class="nav-link">功能特性</a>
+                <a href="#usage" class="nav-link">使用指南</a>
+                <a href="#technical" class="nav-link">技术文档</a>
+                <a href="#faq" class="nav-link">常见问题</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <section id="home" class="section hero">
+            <div class="container">
+                <h2 class="hero-title">欢迎使用二维码生成器</h2>
+                <p class="hero-description">一个简单易用的 Chrome 扩展，可以快速为当前页面 URL、选中文本或链接生成二维码</p>
+                <div class="hero-actions">
+                    <a href="#getting-started" class="btn btn-primary">快速开始</a>
+                    <a href="https://gitee.com/mdsfe/qrcode-extension" class="btn btn-secondary" target="_blank">查看源码</a>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🚀</div>
+                        <h3>多种生成方式</h3>
+                        <p>支持通过扩展图标、右键菜单等多种方式快速生成二维码</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h3>用户友好界面</h3>
+                        <p>居中显示的浮动面板、半透明遮罩背景、平滑动画效果</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>便捷操作</h3>
+                        <p>一键复制 URL、下载二维码图片、ESC 键快捷关闭</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌍</div>
+                        <h3>多语言支持</h3>
+                        <p>支持中文、英文、日文，自动适配浏览器语言</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>安全可靠</h3>
+                        <p>基于 Chrome Extension Manifest V3 构建，遵循最新安全标准</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>跨平台兼容</h3>
+                        <p>支持 Chrome 88+、Edge 88+ 及所有基于 Chromium 的浏览器</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="getting-started" class="section">
+            <div class="container">
+                <h2>快速开始</h2>
+                <h3>安装扩展</h3>
+                <h4>方式一：从 Chrome 网上应用店安装（推荐）</h4>
+                <ol>
+                    <li>访问 <a href="https://chrome.google.com/webstore" target="_blank">Chrome 网上应用店</a></li>
+                    <li>搜索"二维码生成器"或"QR Code Generator"</li>
+                    <li>点击"添加至 Chrome"按钮</li>
+                    <li>在确认对话框中点击"添加扩展程序"</li>
+                    <li>安装完成后，扩展图标将出现在浏览器工具栏中</li>
+                </ol>
+                <h4>方式二：开发者模式安装</h4>
+                <ol>
+                    <li>下载或克隆项目代码</li>
+                    <li>打开 Chrome 浏览器，访问 <code>chrome://extensions/</code></li>
+                    <li>开启右上角的"开发者模式"</li>
+                    <li>点击"加载已解压的扩展程序"</li>
+                    <li>选择项目根目录</li>
+                    <li>扩展安装完成</li>
+                </ol>
+                <h3>首次使用</h3>
+                <h4>方法一：通过扩展图标</h4>
+                <ol>
+                    <li>访问任意网页</li>
+                    <li>点击浏览器工具栏中的扩展图标</li>
+                    <li>自动生成当前页面的二维码</li>
+                </ol>
+                <h4>方法二：通过右键菜单</h4>
+                <ol>
+                    <li>在网页中选中文本或右键点击链接</li>
+                    <li>在右键菜单中选择"生成二维码"</li>
+                    <li>自动生成对应内容的二维码</li>
+                </ol>
+            </div>
+        </section>
+
+        <section id="features" class="section">
+            <div class="container">
+                <h2>功能特性</h2>
+                <h3>核心功能</h3>
+                <h4>1. 多种二维码生成方式</h4>
+                <ul>
+                    <li><strong>通过扩展图标生成</strong>：点击浏览器工具栏中的扩展图标，自动生成当前页面的二维码</li>
+                    <li><strong>通过右键菜单生成</strong>：
+                        <ul>
+                            <li>生成选中文本的二维码：选中任意文本，右键选择"生成二维码"</li>
+                            <li>生成链接的二维码：右键点击链接，选择"生成二维码"</li>
+                            <li>生成当前页面的二维码：在页面空白处右键，选择"生成二维码"</li>
+                        </ul>
+                    </li>
+                </ul>
+                <h4>2. 用户友好界面</h4>
+                <ul>
+                    <li>居中显示的浮动面板，不遮挡页面内容</li>
+                    <li>半透明遮罩背景，突出二维码显示</li>
+                    <li>响应式布局，适配不同屏幕尺寸</li>
+                    <li>平滑的打开/关闭动画</li>
+                    <li>优雅的加载动画过渡</li>
+                    <li>清晰的错误状态提示</li>
+                </ul>
+                <h4>3. 便捷操作</h4>
+                <ul>
+                    <li><strong>URL 管理</strong>：一键复制 URL、快速选择文本、复制成功提示</li>
+                    <li><strong>二维码下载</strong>：一键下载、自动命名、下载提示、悬停显示</li>
+                    <li><strong>面板控制</strong>：关闭按钮、遮罩关闭、ESC 快捷键、自动清理</li>
+                </ul>
+                <h4>4. 多语言支持</h4>
+                <ul>
+                    <li>中文：完整的中文界面和提示</li>
+                    <li>英文：英文界面支持</li>
+                    <li>日文：日文界面支持</li>
+                    <li>自动适配：自动识别浏览器语言并切换</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="usage" class="section">
+            <div class="container">
+                <h2>使用指南</h2>
+                <h3>基本使用</h3>
+                <h4>生成当前页面二维码</h4>
+                <ol>
+                    <li>访问任意网页</li>
+                    <li>点击浏览器工具栏中的扩展图标</li>
+                    <li>自动弹出二维码面板，显示当前页面的二维码</li>
+                    <li>使用手机扫描二维码即可访问该页面</li>
+                </ol>
+                <h4>生成选中文本的二维码</h4>
+                <ol>
+                    <li>在网页中选中需要转换的文本</li>
+                    <li>右键点击选中的文本</li>
+                    <li>在右键菜单中选择"生成二维码"</li>
+                    <li>二维码面板显示，包含选中的文本内容</li>
+                </ol>
+                <h4>生成链接的二维码</h4>
+                <ol>
+                    <li>在网页中找到需要生成二维码的链接</li>
+                    <li>右键点击该链接</li>
+                    <li>在右键菜单中选择"生成二维码"</li>
+                    <li>二维码面板显示，包含该链接的 URL</li>
+                </ol>
+                <h3>高级操作</h3>
+                <h4>复制 URL</h4>
+                <ol>
+                    <li>在二维码面板中找到 URL 显示区域</li>
+                    <li>点击"复制"按钮</li>
+                    <li>URL 已复制到剪贴板</li>
+                    <li>显示复制成功提示</li>
+                </ol>
+                <h4>下载二维码</h4>
+                <ol>
+                    <li>在二维码面板中，将鼠标悬停在二维码上方</li>
+                    <li>点击出现的"下载"按钮</li>
+                    <li>二维码图片自动下载</li>
+                    <li>文件名格式：<code>qrcode-YYYYMMDD-HHmmss.png</code></li>
+                </ol>
+                <h4>关闭面板</h4>
+                <ul>
+                    <li><strong>方式一</strong>：点击面板右上角的关闭按钮（×）</li>
+                    <li><strong>方式二</strong>：点击面板外的遮罩层</li>
+                    <li><strong>方式三</strong>：按键盘上的 ESC 键</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="technical" class="section">
+            <div class="container">
+                <h2>技术文档</h2>
+                <h3>技术架构</h3>
+                <h4>核心技术栈</h4>
+                <ul>
+                    <li><strong>Chrome Extension Manifest V3</strong>：使用最新的扩展规范</li>
+                    <li><strong>QRCode.js</strong>：二维码生成库</li>
+                    <li><strong>原生 JavaScript</strong>：无框架依赖，轻量高效</li>
+                    <li><strong>Canvas API</strong>：二维码图片导出</li>
+                    <li><strong>i18n API</strong>：国际化支持</li>
+                </ul>
+                <h3>核心组件</h3>
+                <h4>1. Background Script (background.js)</h4>
+                <p><strong>职责</strong>：</p>
+                <ul>
+                    <li>处理右键菜单创建和管理</li>
+                    <li>处理扩展消息传递</li>
+                    <li>管理扩展生命周期</li>
+                </ul>
+                <h4>2. Content Script (content.js)</h4>
+                <p><strong>职责</strong>：</p>
+                <ul>
+                    <li>在网页中注入二维码面板</li>
+                    <li>处理用户交互（复制、下载、关闭）</li>
+                    <li>管理面板的显示和隐藏</li>
+                </ul>
+                <h4>3. Popup Script (popup.js)</h4>
+                <p><strong>职责</strong>：</p>
+                <ul>
+                    <li>处理扩展图标点击</li>
+                    <li>与 Background Script 通信</li>
+                    <li>触发二维码生成</li>
+                </ul>
+                <h3>文件结构</h3>
+                <pre><code>qrcode-extension/
+├── manifest.json          # 扩展清单文件
+├── background.js          # Background Script
+├── content.js             # Content Script
+├── popup.html             # Popup 页面
+├── popup.js               # Popup 脚本
+├── qrcode.min.js          # QRCode.js 库
+├── icons/                 # 图标资源
+└── _locales/              # 国际化资源</code></pre>
+                <h3>浏览器兼容性</h3>
+                <ul>
+                    <li>Chrome 88+</li>
+                    <li>Edge 88+</li>
+                    <li>其他基于 Chromium 的浏览器 88+</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="faq" class="section">
+            <div class="container">
+                <h2>常见问题</h2>
+                <h3>安装相关</h3>
+                <h4>Q: 如何安装扩展？</h4>
+                <p><strong>A:</strong> 有两种安装方式：</p>
+                <ol>
+                    <li><strong>从 Chrome 网上应用店安装</strong>（推荐）：访问 Chrome 网上应用店，搜索"二维码生成器"，点击"添加至 Chrome"</li>
+                    <li><strong>开发者模式安装</strong>：访问 <code>chrome://extensions/</code>，开启"开发者模式"，点击"加载已解压的扩展程序"，选择项目目录</li>
+                </ol>
+                <h4>Q: 支持哪些浏览器？</h4>
+                <p><strong>A:</strong> 支持以下浏览器：</p>
+                <ul>
+                    <li>Chrome 88 及以上版本</li>
+                    <li>Edge 88 及以上版本</li>
+                    <li>其他基于 Chromium 的浏览器 88+</li>
+                </ul>
+                <h3>使用相关</h3>
+                <h4>Q: 如何生成当前页面的二维码？</h4>
+                <p><strong>A:</strong> 有两种方式：</p>
+                <ol>
+                    <li>点击浏览器工具栏中的扩展图标</li>
+                    <li>在页面空白处右键，选择"生成二维码"</li>
+                </ol>
+                <h4>Q: 二维码无法生成？</h4>
+                <p><strong>A:</strong> 请尝试以下方法：</p>
+                <ul>
+                    <li>检查内容是否过长</li>
+                    <li>确认浏览器版本是否支持（Chrome 88+）</li>
+                    <li>尝试刷新页面后重试</li>
+                    <li>检查扩展是否已启用</li>
+                    <li>重新加载扩展</li>
+                </ul>
+                <h3>技术相关</h3>
+                <h4>Q: 数据会上传到服务器吗？</h4>
+                <p><strong>A:</strong> 不会。所有处理都在本地完成：</p>
+                <ul>
+                    <li>二维码生成在浏览器本地完成</li>
+                    <li>不收集任何用户数据</li>
+                    <li>不上传任何信息到服务器</li>
+                    <li>完全保护用户隐私</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>基于 MIT 许可证发布 | Copyright © 2025 mdsfe</p>
+            <p>
+                <a href="https://gitee.com/mdsfe/qrcode-extension" target="_blank">Gitee</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+

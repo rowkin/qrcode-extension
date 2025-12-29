@@ -1,0 +1,50 @@
+{
+  "extName": {
+    "message": "二维码生成器",
+    "description": "扩展名称"
+  },
+  "extDescription": {
+    "message": "为选中的网址、文本或当前页面生成二维码。",
+    "description": "扩展描述"
+  },
+  "contextMenuTitle": {
+    "message": "生成二维码",
+    "description": "右键菜单项标题"
+  },
+  "copyButtonText": {
+    "message": "复制",
+    "description": "复制按钮文本"
+  },
+  "copiedText": {
+    "message": "已复制",
+    "description": "复制成功后显示的文本"
+  },
+  "copyFailedText": {
+    "message": "复制失败",
+    "description": "复制失败时显示的文本"
+  },
+  "clickToSelectText": {
+    "message": "点击选择",
+    "description": "URL文本提示"
+  },
+  "generateFailedText": {
+    "message": "二维码生成失败",
+    "description": "二维码生成失败时的错误信息"
+  },
+  "downloadQRCode": {
+    "message": "下载二维码",
+    "description": "下载按钮提示文本"
+  },
+  "downloadSuccess": {
+    "message": "下载成功",
+    "description": "下载成功后显示的消息"
+  },
+  "downloadFailed": {
+    "message": "下载失败",
+    "description": "下载失败时显示的消息"
+  },
+  "loadingText": {
+    "message": "正在生成二维码...",
+    "description": "生成二维码时显示的文本"
+  }
+}

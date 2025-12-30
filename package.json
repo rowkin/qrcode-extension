@@ -17,6 +17,8 @@
     "docs:deploy:prepare": "node scripts/deploy-docs.js prepare",
     "docs:deploy:zip": "node scripts/deploy-docs.js zip",
     "docs:deploy:git": "node scripts/deploy-docs.js git",
+    "docs:deploy:hook": "bash scripts/deploy-hook.sh",
+    "docs:deploy:auto": "git push origin env_site && npm run docs:deploy:hook",
     "postinstall": "npm run check-node-version",
     "check-node-version": "node -e \"if (process.versions.node.split('.')[0] < 14) { console.error('Requires Node.js 14+'); process.exit(1); }\""
   },

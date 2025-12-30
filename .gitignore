@@ -78,6 +78,3 @@ scripts/
 *.md
 !README.md
 !README-zh.md
-
-# 其他
-*.sh

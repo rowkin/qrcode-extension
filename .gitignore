@@ -9,6 +9,7 @@ pnpm-debug.log*
 # TypeScript 编译输出
 *.tsbuildinfo
 dist/
+dist-docs/
 
 # 环境配置文件（敏感信息）
 .env
@@ -61,8 +62,8 @@ temp/
 coverage/
 *.lcov
 
-# 包锁定文件（如果你不希望锁定文件被提交）
-# package-lock.json
+# 包锁定文件（应该提交以锁定依赖版本）
+# package-lock.json 应该提交
 # yarn.lock
 # pnpm-lock.yaml
 
@@ -72,3 +73,11 @@ manifest.json.backup
 screenshots/
 build/
 scripts/
+
+# 文档
+*.md
+!README.md
+!README-zh.md
+
+# 其他
+*.sh

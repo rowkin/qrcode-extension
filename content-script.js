@@ -266,8 +266,8 @@ function injectStyles() {
       }
       
       .color-picker-panel {
-        margin-top: 12px;
-        padding: 12px;
+        margin-top: 8px;
+        padding: 10px;
         background: #fafafa;
         border-radius: 4px;
         animation: slideDown 0.3s ease;
@@ -290,7 +290,7 @@ function injectStyles() {
       .color-picker-row {
         display: flex;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
         width: 100%;
         box-sizing: border-box;
       }
@@ -300,36 +300,36 @@ function injectStyles() {
       }
       
       .color-picker-row label {
-        width: 80px;
-        font-size: 13px;
+        width: 70px;
+        font-size: 12px;
         color: #5f6368;
         flex-shrink: 0;
-        min-width: 80px;
+        min-width: 70px;
       }
       
       .color-input-group {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         flex: 1;
         min-width: 0;
       }
       
       .color-input {
-        width: 50px;
-        height: 32px;
+        width: 40px;
+        height: 28px;
         border: 1px solid #dadce0;
-        border-radius: 4px;
+        border-radius: 3px;
         cursor: pointer;
         padding: 0;
       }
       
       .color-text-input {
         flex: 1;
-        padding: 6px 8px;
+        padding: 4px 6px;
         border: 1px solid #dadce0;
-        border-radius: 4px;
-        font-size: 13px;
+        border-radius: 3px;
+        font-size: 12px;
         font-family: monospace;
         min-width: 0;
       }
@@ -360,39 +360,40 @@ function injectStyles() {
       }
       
       .padding-control {
-        margin-top: 12px;
-        padding-top: 12px;
+        margin-top: 8px;
+        padding-top: 8px;
         border-top: 1px solid #e0e0e0;
       }
       
       .padding-label {
-        font-size: 12px;
+        font-size: 11px;
         color: #5f6368;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        font-weight: 500;
       }
       
       .padding-value {
-        font-size: 12px;
+        font-size: 11px;
         color: #1a73e8;
-        font-weight: 500;
-        min-width: 40px;
+        font-weight: 600;
+        min-width: 30px;
         text-align: right;
       }
       
       .padding-slider-container {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
+        gap: 6px;
+        margin-bottom: 6px;
       }
       
       .padding-slider {
         flex: 1;
-        height: 6px;
-        border-radius: 3px;
+        height: 4px;
+        border-radius: 2px;
         background: #e0e0e0;
         outline: none;
         -webkit-appearance: none;
@@ -402,8 +403,8 @@ function injectStyles() {
       .padding-slider::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
         background: #1a73e8;
         cursor: pointer;
@@ -412,12 +413,12 @@ function injectStyles() {
       
       .padding-slider::-webkit-slider-thumb:hover {
         background: #1557b0;
-        transform: scale(1.1);
+        transform: scale(1.15);
       }
       
       .padding-slider::-moz-range-thumb {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
         background: #1a73e8;
         cursor: pointer;
@@ -427,21 +428,21 @@ function injectStyles() {
       
       .padding-slider::-moz-range-thumb:hover {
         background: #1557b0;
-        transform: scale(1.1);
+        transform: scale(1.15);
       }
       
       .padding-preset-buttons {
         display: flex;
-        gap: 6px;
+        gap: 4px;
         flex-wrap: wrap;
       }
       
       .padding-preset-btn {
-        padding: 4px 12px;
-        font-size: 11px;
+        padding: 3px 10px;
+        font-size: 10px;
         background: white;
         border: 1px solid #dadce0;
-        border-radius: 4px;
+        border-radius: 3px;
         cursor: pointer;
         color: #5f6368;
         transition: all 0.2s;
@@ -458,6 +459,28 @@ function injectStyles() {
         background: #1a73e8;
         border-color: #1a73e8;
         color: white;
+      }
+      
+      /* 设置项分组样式 - 为未来扩展准备 */
+      .settings-group {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #e0e0e0;
+      }
+      
+      .settings-group:first-child {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+      }
+      
+      .settings-group-title {
+        font-size: 11px;
+        color: #5f6368;
+        margin-bottom: 6px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       
       .preset-btn {
@@ -487,19 +510,19 @@ function injectStyles() {
       }
       
       .color-actions {
-        margin-top: 12px;
+        margin-top: 8px;
         display: flex;
-        gap: 8px;
+        gap: 6px;
         justify-content: flex-end;
       }
       
       .reset-color-btn {
-        padding: 6px 16px;
+        padding: 4px 12px;
         background: white;
         border: 1px solid #dadce0;
-        border-radius: 4px;
+        border-radius: 3px;
         cursor: pointer;
-        font-size: 13px;
+        font-size: 11px;
         color: #5f6368;
         transition: all 0.2s;
       }
@@ -836,8 +859,22 @@ async function generateQRCodeWithPadding(canvas, url, colorDark, colorLight, pad
     tempContainer.style.height = '256px';
     document.body.appendChild(tempContainer);
     
+    let qrCodeInstance = null;
+    let resolved = false;
+    
+    // 超时处理
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        if (tempContainer.parentNode) {
+          document.body.removeChild(tempContainer);
+        }
+        reject(new Error('QR code generation timeout'));
+      }
+    }, 10000);
+    
     try {
-      new QRCode(tempContainer, {
+      qrCodeInstance = new QRCode(tempContainer, {
         text: url,
         width: 256,
         height: 256,
@@ -845,39 +882,64 @@ async function generateQRCodeWithPadding(canvas, url, colorDark, colorLight, pad
         colorLight: colorLight,
         correctLevel: QRCode.CorrectLevel.H,
         onRender: () => {
-          const qrImg = tempContainer.querySelector('img');
-          if (qrImg) {
-            qrImg.onload = () => {
-              const ctx = canvas.getContext('2d');
-              const paddingPx = Math.round((padding / 100) * 256);
-              const totalSize = 256 + paddingPx * 2;
+          // 使用轮询检查图片是否已加载
+          const checkImage = setInterval(() => {
+            const qrImg = tempContainer.querySelector('img');
+            if (qrImg && qrImg.complete && qrImg.naturalWidth > 0) {
+              clearInterval(checkImage);
+              clearTimeout(timeout);
               
-              canvas.width = totalSize;
-              canvas.height = totalSize;
+              if (resolved) return;
+              resolved = true;
               
-              // 绘制背景色
-              ctx.fillStyle = colorLight;
-              ctx.fillRect(0, 0, totalSize, totalSize);
-              
-              // 绘制二维码（居中，带留白）
-              ctx.drawImage(qrImg, paddingPx, paddingPx, 256, 256);
-              
-              // 清理临时容器
-              document.body.removeChild(tempContainer);
-              resolve();
-            };
-            qrImg.onerror = () => {
-              document.body.removeChild(tempContainer);
-              reject(new Error('QR code image load failed'));
-            };
-          } else {
-            document.body.removeChild(tempContainer);
-            reject(new Error('QR code image not found'));
-          }
+              try {
+                const ctx = canvas.getContext('2d');
+                const paddingPx = Math.round((padding / 100) * 256);
+                const totalSize = 256 + paddingPx * 2;
+                
+                canvas.width = totalSize;
+                canvas.height = totalSize;
+                
+                // 绘制背景色
+                ctx.fillStyle = colorLight;
+                ctx.fillRect(0, 0, totalSize, totalSize);
+                
+                // 绘制二维码（居中，带留白）
+                ctx.drawImage(qrImg, paddingPx, paddingPx, 256, 256);
+                
+                // 清理临时容器
+                if (tempContainer.parentNode) {
+                  document.body.removeChild(tempContainer);
+                }
+                resolve();
+              } catch (error) {
+                if (tempContainer.parentNode) {
+                  document.body.removeChild(tempContainer);
+                }
+                reject(error);
+              }
+            }
+          }, 50);
+          
+          // 5秒后如果还没加载完，清除检查
+          setTimeout(() => {
+            clearInterval(checkImage);
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timeout);
+              if (tempContainer.parentNode) {
+                document.body.removeChild(tempContainer);
+              }
+              reject(new Error('QR code image load timeout'));
+            }
+          }, 5000);
         }
       });
     } catch (error) {
-      document.body.removeChild(tempContainer);
+      clearTimeout(timeout);
+      if (tempContainer.parentNode) {
+        document.body.removeChild(tempContainer);
+      }
       reject(error);
     }
   });
@@ -886,6 +948,10 @@ async function generateQRCodeWithPadding(canvas, url, colorDark, colorLight, pad
 // 生成二维码
 async function generateQRCode(panel, url, colorDark = null, colorLight = null, padding = null) {
   const container = panel.querySelector('#qrcode-container');
+  if (!container) {
+    console.error('QR code container not found');
+    return;
+  }
   
   // 获取颜色设置
   if (!colorDark || !colorLight) {
@@ -917,53 +983,51 @@ async function generateQRCode(panel, url, colorDark = null, colorLight = null, p
 
   container.appendChild(loadingState);
 
-  setTimeout(async () => {
-    try {
-      // 创建 canvas 用于显示带留白的二维码
-      const canvas = document.createElement('canvas');
-      canvas.style.width = '100%';
-      canvas.style.height = '100%';
-      canvas.style.maxWidth = '256px';
-      canvas.style.maxHeight = '256px';
-      canvas.style.objectFit = 'contain';
-      
-      await generateQRCodeWithPadding(canvas, url, colorDark, colorLight, padding);
-      
-      // 移除加载状态
-      const loadingState = container.querySelector('.loading-state');
-      if (loadingState) {
-        loadingState.remove();
-      }
-      
-      // 添加 canvas 到容器
-      container.appendChild(canvas);
-      
-      // 保存 canvas 引用到容器，供下载使用
-      container.dataset.qrCanvas = 'true';
-      container.dataset.qrUrl = url;
-      container.dataset.qrColorDark = colorDark;
-      container.dataset.qrColorLight = colorLight;
-      container.dataset.qrPadding = padding;
-      
-      // 添加下载功能
-      setupDownloadHandler(panel);
-      
-    } catch (error) {
-      console.error('QR Code generation failed:', error);
-      container.innerHTML = `
-        <div class="error-container">
-          <div class="error-icon">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-              <path fill="#d93025" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-            </svg>
-          </div>
-          <div class="error-message">
-            ${chrome.i18n.getMessage("generateFailedText") || '生成二维码失败'}
-          </div>
-        </div>
-      `;
+  try {
+    // 创建 canvas 用于显示带留白的二维码
+    const canvas = document.createElement('canvas');
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.maxWidth = '256px';
+    canvas.style.maxHeight = '256px';
+    canvas.style.objectFit = 'contain';
+    
+    await generateQRCodeWithPadding(canvas, url, colorDark, colorLight, padding);
+    
+    // 移除加载状态
+    const loadingState = container.querySelector('.loading-state');
+    if (loadingState) {
+      loadingState.remove();
     }
-  }, 100);
+    
+    // 添加 canvas 到容器
+    container.appendChild(canvas);
+    
+    // 保存 canvas 引用到容器，供下载使用
+    container.dataset.qrCanvas = 'true';
+    container.dataset.qrUrl = url;
+    container.dataset.qrColorDark = colorDark;
+    container.dataset.qrColorLight = colorLight;
+    container.dataset.qrPadding = padding;
+    
+    // 添加下载功能
+    setupDownloadHandler(panel);
+    
+  } catch (error) {
+    console.error('QR Code generation failed:', error);
+    container.innerHTML = `
+      <div class="error-container">
+        <div class="error-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="#d93025" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+        </div>
+        <div class="error-message">
+          ${chrome.i18n.getMessage("generateFailedText") || '生成二维码失败'}
+        </div>
+      </div>
+    `;
+  }
 }
 
 function injectQRCodePanel(url) {
@@ -1010,8 +1074,8 @@ function injectQRCodePanel(url) {
               <input type="text" id="color-light-text" value="#ffffff" class="color-text-input" maxlength="7">
             </div>
           </div>
-          <div class="preset-colors">
-            <div class="preset-label">${chrome.i18n.getMessage("presetColors")}:</div>
+          <div class="settings-group">
+            <div class="settings-group-title">${chrome.i18n.getMessage("presetColors")}</div>
             <div class="preset-buttons">
               <button class="preset-btn" data-dark="#000000" data-light="#ffffff" title="${chrome.i18n.getMessage("classicBlackWhite")}">
                 <span class="preset-color-box" style="background: linear-gradient(135deg, #000000 0%, #000000 50%, #ffffff 50%, #ffffff 100%);"></span>
@@ -1030,12 +1094,10 @@ function injectQRCodePanel(url) {
               </button>
             </div>
           </div>
-          <div class="color-actions">
-            <button class="reset-color-btn" id="reset-color-btn">${chrome.i18n.getMessage("resetColor")}</button>
-          </div>
-          <div class="padding-control">
+          <div class="settings-group">
+            <div class="settings-group-title">${chrome.i18n.getMessage("paddingControl")}</div>
             <div class="padding-label">
-              <span>${chrome.i18n.getMessage("paddingControl")}</span>
+              <span>${chrome.i18n.getMessage("paddingValue")}</span>
               <span class="padding-value" id="padding-value">0</span>
             </div>
             <div class="padding-slider-container">
@@ -1047,6 +1109,9 @@ function injectQRCodePanel(url) {
               <button class="padding-preset-btn" data-padding="20" title="${chrome.i18n.getMessage("paddingMedium")}">${chrome.i18n.getMessage("paddingMedium")}</button>
               <button class="padding-preset-btn" data-padding="30" title="${chrome.i18n.getMessage("paddingLarge")}">${chrome.i18n.getMessage("paddingLarge")}</button>
             </div>
+          </div>
+          <div class="color-actions">
+            <button class="reset-color-btn" id="reset-color-btn">${chrome.i18n.getMessage("resetColor")}</button>
           </div>
         </div>
       </div>

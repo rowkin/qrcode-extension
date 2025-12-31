@@ -271,6 +271,9 @@ function injectStyles() {
         background: #fafafa;
         border-radius: 4px;
         animation: slideDown 0.3s ease;
+        box-sizing: border-box;
+        overflow: hidden;
+        width: 100%;
       }
       
       @keyframes slideDown {
@@ -288,6 +291,12 @@ function injectStyles() {
         display: flex;
         align-items: center;
         margin-bottom: 12px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      
+      .color-picker-row:last-child {
+        margin-bottom: 0;
       }
       
       .color-picker-row label {
@@ -295,6 +304,7 @@ function injectStyles() {
         font-size: 13px;
         color: #5f6368;
         flex-shrink: 0;
+        min-width: 80px;
       }
       
       .color-input-group {
@@ -302,6 +312,7 @@ function injectStyles() {
         align-items: center;
         gap: 8px;
         flex: 1;
+        min-width: 0;
       }
       
       .color-input {
@@ -344,6 +355,109 @@ function injectStyles() {
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      
+      .padding-control {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #e0e0e0;
+      }
+      
+      .padding-label {
+        font-size: 12px;
+        color: #5f6368;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .padding-value {
+        font-size: 12px;
+        color: #1a73e8;
+        font-weight: 500;
+        min-width: 40px;
+        text-align: right;
+      }
+      
+      .padding-slider-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      
+      .padding-slider {
+        flex: 1;
+        height: 6px;
+        border-radius: 3px;
+        background: #e0e0e0;
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      
+      .padding-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #1a73e8;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .padding-slider::-webkit-slider-thumb:hover {
+        background: #1557b0;
+        transform: scale(1.1);
+      }
+      
+      .padding-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #1a73e8;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+      }
+      
+      .padding-slider::-moz-range-thumb:hover {
+        background: #1557b0;
+        transform: scale(1.1);
+      }
+      
+      .padding-preset-buttons {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      
+      .padding-preset-btn {
+        padding: 4px 12px;
+        font-size: 11px;
+        background: white;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        cursor: pointer;
+        color: #5f6368;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      
+      .padding-preset-btn:hover {
+        background: #f5f5f5;
+        border-color: #1a73e8;
+        color: #1a73e8;
+      }
+      
+      .padding-preset-btn.active {
+        background: #1a73e8;
+        border-color: #1a73e8;
+        color: white;
       }
       
       .preset-btn {
@@ -693,8 +807,84 @@ function saveColorSettings(colorDark, colorLight) {
   });
 }
 
+// 获取留白设置
+async function getPaddingSettings() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['qrPadding'], (result) => {
+      resolve({
+        padding: result.qrPadding !== undefined ? result.qrPadding : 0
+      });
+    });
+  });
+}
+
+// 保存留白设置
+function savePaddingSettings(padding) {
+  chrome.storage.local.set({
+    qrPadding: padding
+  });
+}
+
+// 生成带留白的二维码
+async function generateQRCodeWithPadding(canvas, url, colorDark, colorLight, padding) {
+  return new Promise((resolve, reject) => {
+    // 创建临时容器生成二维码
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.width = '256px';
+    tempContainer.style.height = '256px';
+    document.body.appendChild(tempContainer);
+    
+    try {
+      new QRCode(tempContainer, {
+        text: url,
+        width: 256,
+        height: 256,
+        colorDark: colorDark,
+        colorLight: colorLight,
+        correctLevel: QRCode.CorrectLevel.H,
+        onRender: () => {
+          const qrImg = tempContainer.querySelector('img');
+          if (qrImg) {
+            qrImg.onload = () => {
+              const ctx = canvas.getContext('2d');
+              const paddingPx = Math.round((padding / 100) * 256);
+              const totalSize = 256 + paddingPx * 2;
+              
+              canvas.width = totalSize;
+              canvas.height = totalSize;
+              
+              // 绘制背景色
+              ctx.fillStyle = colorLight;
+              ctx.fillRect(0, 0, totalSize, totalSize);
+              
+              // 绘制二维码（居中，带留白）
+              ctx.drawImage(qrImg, paddingPx, paddingPx, 256, 256);
+              
+              // 清理临时容器
+              document.body.removeChild(tempContainer);
+              resolve();
+            };
+            qrImg.onerror = () => {
+              document.body.removeChild(tempContainer);
+              reject(new Error('QR code image load failed'));
+            };
+          } else {
+            document.body.removeChild(tempContainer);
+            reject(new Error('QR code image not found'));
+          }
+        }
+      });
+    } catch (error) {
+      document.body.removeChild(tempContainer);
+      reject(error);
+    }
+  });
+}
+
 // 生成二维码
-async function generateQRCode(panel, url, colorDark = null, colorLight = null) {
+async function generateQRCode(panel, url, colorDark = null, colorLight = null, padding = null) {
   const container = panel.querySelector('#qrcode-container');
   
   // 获取颜色设置
@@ -702,6 +892,12 @@ async function generateQRCode(panel, url, colorDark = null, colorLight = null) {
     const colors = await getColorSettings();
     colorDark = colorDark || colors.colorDark;
     colorLight = colorLight || colors.colorLight;
+  }
+  
+  // 获取留白设置
+  if (padding === null) {
+    const paddingSettings = await getPaddingSettings();
+    padding = paddingSettings.padding;
   }
   
   // 清空容器
@@ -721,44 +917,36 @@ async function generateQRCode(panel, url, colorDark = null, colorLight = null) {
 
   container.appendChild(loadingState);
 
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
-      // 直接在容器中生成二维码
-      new QRCode(container, {
-        text: url,
-        width: 256,
-        height: 256,
-        colorDark: colorDark,
-        colorLight: colorLight,
-        correctLevel: QRCode.CorrectLevel.H,
-        onRender: () => {
-          // 二维码渲染完成后
-          const loadingState = container.querySelector('.loading-state');
-          if (loadingState) {
-            loadingState.remove();
-          }
-          
-          // 添加下载功能
-          setupDownloadHandler(panel);
-        }
-      });
+      // 创建 canvas 用于显示带留白的二维码
+      const canvas = document.createElement('canvas');
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      canvas.style.maxWidth = '256px';
+      canvas.style.maxHeight = '256px';
+      canvas.style.objectFit = 'contain';
       
-      // 确保图片加载完成
-      const checkImage = setInterval(() => {
-        const qrImage = container.querySelector('img');
-        if (qrImage && qrImage.complete) {
-          clearInterval(checkImage);
-          const loadingState = container.querySelector('.loading-state');
-          if (loadingState) {
-            loadingState.remove();
-          }
-          // 添加下载功能
-          setupDownloadHandler(panel);
-        }
-      }, 100);
-
-      // 5秒后如果还没加载完，清除检查
-      setTimeout(() => clearInterval(checkImage), 5000);
+      await generateQRCodeWithPadding(canvas, url, colorDark, colorLight, padding);
+      
+      // 移除加载状态
+      const loadingState = container.querySelector('.loading-state');
+      if (loadingState) {
+        loadingState.remove();
+      }
+      
+      // 添加 canvas 到容器
+      container.appendChild(canvas);
+      
+      // 保存 canvas 引用到容器，供下载使用
+      container.dataset.qrCanvas = 'true';
+      container.dataset.qrUrl = url;
+      container.dataset.qrColorDark = colorDark;
+      container.dataset.qrColorLight = colorLight;
+      container.dataset.qrPadding = padding;
+      
+      // 添加下载功能
+      setupDownloadHandler(panel);
       
     } catch (error) {
       console.error('QR Code generation failed:', error);
@@ -845,6 +1033,21 @@ function injectQRCodePanel(url) {
           <div class="color-actions">
             <button class="reset-color-btn" id="reset-color-btn">${chrome.i18n.getMessage("resetColor")}</button>
           </div>
+          <div class="padding-control">
+            <div class="padding-label">
+              <span>${chrome.i18n.getMessage("paddingControl")}</span>
+              <span class="padding-value" id="padding-value">0</span>
+            </div>
+            <div class="padding-slider-container">
+              <input type="range" id="padding-slider" class="padding-slider" min="0" max="100" value="0" step="1">
+            </div>
+            <div class="padding-preset-buttons">
+              <button class="padding-preset-btn" data-padding="0" title="${chrome.i18n.getMessage("paddingNone")}">${chrome.i18n.getMessage("paddingNone")}</button>
+              <button class="padding-preset-btn" data-padding="10" title="${chrome.i18n.getMessage("paddingSmall")}">${chrome.i18n.getMessage("paddingSmall")}</button>
+              <button class="padding-preset-btn" data-padding="20" title="${chrome.i18n.getMessage("paddingMedium")}">${chrome.i18n.getMessage("paddingMedium")}</button>
+              <button class="padding-preset-btn" data-padding="30" title="${chrome.i18n.getMessage("paddingLarge")}">${chrome.i18n.getMessage("paddingLarge")}</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -875,7 +1078,13 @@ function injectQRCodePanel(url) {
 // 添加下载功能
 function setupDownloadHandler(panel) {
   const qrcodeContainer = panel.querySelector('#qrcode-container');
-  const qrcodeImg = qrcodeContainer.querySelector('img');
+  const qrCanvas = qrcodeContainer.querySelector('canvas');
+  
+  // 如果已存在下载按钮，先移除
+  const existingDownloadContainer = qrcodeContainer.querySelector('.download-container');
+  if (existingDownloadContainer) {
+    existingDownloadContainer.remove();
+  }
   
   // 创建下载按钮容器
   const downloadContainer = document.createElement('div');
@@ -896,50 +1105,29 @@ function setupDownloadHandler(panel) {
   // 添加下载事件
   downloadBtn.addEventListener('click', async () => {
     try {
-      // 创建一个临时 canvas 来处理二维码图片
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      // 设置 canvas 尺寸
-      canvas.width = qrcodeImg.width;
-      canvas.height = qrcodeImg.height;
-      
-      // 绘制白色背景
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // 等待图片加载完成
-      await new Promise((resolve, reject) => {
-        if (qrcodeImg.complete) {
-          resolve();
-        } else {
-          qrcodeImg.onload = resolve;
-          qrcodeImg.onerror = reject;
-        }
-      });
-      
-      // 绘制二维码图片
-      ctx.drawImage(qrcodeImg, 0, 0);
-      
-      // 创建下载链接
-      const link = document.createElement('a');
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      link.download = `qrcode-${timestamp}.png`;
-      link.href = canvas.toDataURL('image/png');
-      
-      // 触发下载
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // 显示下载成功提示
-      const tooltip = panel.querySelector('.tooltip');
-      tooltip.textContent = chrome.i18n.getMessage("downloadSuccess");
-      tooltip.classList.add('show');
-      
-      setTimeout(() => {
-        tooltip.classList.remove('show');
-      }, 2000);
+      if (qrCanvas) {
+        // 直接使用 canvas 数据
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        link.download = `qrcode-${timestamp}.png`;
+        link.href = qrCanvas.toDataURL('image/png');
+        
+        // 触发下载
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // 显示下载成功提示
+        const tooltip = panel.querySelector('.tooltip');
+        tooltip.textContent = chrome.i18n.getMessage("downloadSuccess");
+        tooltip.classList.add('show');
+        
+        setTimeout(() => {
+          tooltip.classList.remove('show');
+        }, 2000);
+      } else {
+        throw new Error('QR code canvas not found');
+      }
       
     } catch (error) {
       console.error('Download failed:', error);
@@ -976,13 +1164,32 @@ async function setupColorCustomizer(panel, url) {
   colorLightInput.value = colors.colorLight;
   colorLightText.value = colors.colorLight;
   
+  // 加载保存的留白设置
+  const paddingSettings = await getPaddingSettings();
+  const paddingSlider = panel.querySelector('#padding-slider');
+  const paddingValue = panel.querySelector('#padding-value');
+  paddingSlider.value = paddingSettings.padding;
+  paddingValue.textContent = paddingSettings.padding;
+  
+  // 更新推荐值按钮状态
+  const paddingPresetBtns = panel.querySelectorAll('.padding-preset-btn');
+  paddingPresetBtns.forEach(btn => {
+    if (parseInt(btn.dataset.padding) === paddingSettings.padding) {
+      btn.classList.add('active');
+    }
+  });
+  
   // 防抖函数
   let debounceTimer = null;
-  const debounceGenerate = (dark, light) => {
+  const debounceGenerate = (dark, light, padding = null) => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      generateQRCode(panel, url, dark, light);
+    debounceTimer = setTimeout(async () => {
+      const currentPadding = padding !== null ? padding : parseInt(paddingSlider.value);
+      await generateQRCode(panel, url, dark, light, currentPadding);
       saveColorSettings(dark, light);
+      if (padding !== null) {
+        savePaddingSettings(padding);
+      }
     }, 300);
   };
   
@@ -1044,8 +1251,40 @@ async function setupColorCustomizer(panel, url) {
     colorDarkText.value = defaultDark;
     colorLightInput.value = defaultLight;
     colorLightText.value = defaultLight;
-    generateQRCode(panel, url, defaultDark, defaultLight);
+    generateQRCode(panel, url, defaultDark, defaultLight, 0);
     saveColorSettings(defaultDark, defaultLight);
+    savePaddingSettings(0);
+    paddingSlider.value = 0;
+    paddingValue.textContent = '0';
+    paddingPresetBtns.forEach(btn => btn.classList.remove('active'));
+    paddingPresetBtns[0].classList.add('active');
+  });
+  
+  // 留白滑块变化
+  paddingSlider.addEventListener('input', (e) => {
+    const value = parseInt(e.target.value);
+    paddingValue.textContent = value;
+    // 更新推荐值按钮状态
+    paddingPresetBtns.forEach(btn => {
+      btn.classList.remove('active');
+      if (parseInt(btn.dataset.padding) === value) {
+        btn.classList.add('active');
+      }
+    });
+    debounceGenerate(colorDarkInput.value, colorLightInput.value, value);
+  });
+  
+  // 推荐值按钮
+  paddingPresetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const padding = parseInt(btn.dataset.padding);
+      paddingSlider.value = padding;
+      paddingValue.textContent = padding;
+      // 更新按钮状态
+      paddingPresetBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      debounceGenerate(colorDarkInput.value, colorLightInput.value, padding);
+    });
   });
 }
 

@@ -90,5 +90,33 @@
   "purpleTheme": {
     "message": "Purple Theme",
     "description": "Purple theme preset"
+  },
+  "paddingControl": {
+    "message": "Padding",
+    "description": "Padding control title"
+  },
+  "paddingValue": {
+    "message": "Padding Value",
+    "description": "Padding value label"
+  },
+  "paddingPreset": {
+    "message": "Recommended",
+    "description": "Recommended padding values title"
+  },
+  "paddingNone": {
+    "message": "None",
+    "description": "No padding"
+  },
+  "paddingSmall": {
+    "message": "Small",
+    "description": "Small padding"
+  },
+  "paddingMedium": {
+    "message": "Medium",
+    "description": "Medium padding"
+  },
+  "paddingLarge": {
+    "message": "Large",
+    "description": "Large padding"
   }
 }

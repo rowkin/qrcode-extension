@@ -90,5 +90,33 @@
   "purpleTheme": {
     "message": "パープルテーマ",
     "description": "パープルテーマプリセット"
+  },
+  "paddingControl": {
+    "message": "余白設定",
+    "description": "余白コントロールタイトル"
+  },
+  "paddingValue": {
+    "message": "余白値",
+    "description": "余白値ラベル"
+  },
+  "paddingPreset": {
+    "message": "推奨値",
+    "description": "推奨余白値タイトル"
+  },
+  "paddingNone": {
+    "message": "なし",
+    "description": "余白なし"
+  },
+  "paddingSmall": {
+    "message": "小",
+    "description": "小さい余白"
+  },
+  "paddingMedium": {
+    "message": "中",
+    "description": "中程度の余白"
+  },
+  "paddingLarge": {
+    "message": "大",
+    "description": "大きい余白"
   }
 }

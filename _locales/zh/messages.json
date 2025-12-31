@@ -90,5 +90,33 @@
   "purpleTheme": {
     "message": "紫色主题",
     "description": "紫色主题预设"
+  },
+  "paddingControl": {
+    "message": "留白设置",
+    "description": "留白控制标题"
+  },
+  "paddingValue": {
+    "message": "留白值",
+    "description": "留白值标签"
+  },
+  "paddingPreset": {
+    "message": "推荐值",
+    "description": "推荐留白值标题"
+  },
+  "paddingNone": {
+    "message": "无",
+    "description": "无留白"
+  },
+  "paddingSmall": {
+    "message": "小",
+    "description": "小留白"
+  },
+  "paddingMedium": {
+    "message": "中",
+    "description": "中等留白"
+  },
+  "paddingLarge": {
+    "message": "大",
+    "description": "大留白"
   }
 }

@@ -45,6 +45,12 @@ function injectStyles() {
         animation: fadeIn 0.3s ease;
       }
       
+      .panel-content {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+      }
+      
       #qrcode-floating-panel .close-btn {
         position: absolute;
         top: 10px;
@@ -68,16 +74,19 @@ function injectStyles() {
         margin: 20px auto;
         padding: 10px;
         background: white;
-        width: 256px;
+        width: 100%;
+        max-width: 256px;
         height: 256px;
         border: 1px solid #ccc;
         border-radius: 4px;
         overflow: hidden;
         position: relative;
+        box-sizing: border-box;
       }
       
       .url-container {
-        width: 256px;
+        width: 100%;
+        max-width: 300px;
         margin: 10px auto;
         position: relative;
         display: flex;
@@ -95,10 +104,28 @@ function injectStyles() {
         text-align: left;
         flex-grow: 1;
         cursor: text;
-        user-select: all;
+        user-select: text;
         padding: 4px;
         margin-right: 8px;
         min-height: 20px;
+        border: 1px solid transparent;
+        border-radius: 2px;
+        outline: none;
+        background: transparent;
+        resize: none;
+        overflow-wrap: break-word;
+        white-space: pre-wrap;
+      }
+      
+      #url-display:focus {
+        border-color: #1a73e8;
+        background: white;
+        outline: none;
+      }
+      
+      #url-display:empty:before {
+        content: attr(placeholder);
+        color: #999;
       }
       
       .copy-btn {
@@ -201,9 +228,12 @@ function injectStyles() {
       
       /* 移动端适配 */
       .color-customizer {
-        margin-top: 15px;
+        width: 100%;
+        max-width: 300px;
+        margin: 15px auto 0;
         border-top: 1px solid #e0e0e0;
         padding-top: 15px;
+        box-sizing: border-box;
       }
       
       .color-toggle-btn {
@@ -219,6 +249,7 @@ function injectStyles() {
         align-items: center;
         justify-content: space-between;
         transition: all 0.2s;
+        box-sizing: border-box;
       }
       
       .color-toggle-btn:hover {
@@ -372,13 +403,23 @@ function injectStyles() {
           max-width: 350px;
         }
         
+        .panel-content {
+          max-width: 100%;
+        }
+        
         .url-container {
           width: 100%;
+          max-width: 100%;
         }
         
         #qrcode-container {
           width: 100%;
           max-width: 256px;
+        }
+        
+        .color-customizer {
+          width: 100%;
+          max-width: 100%;
         }
         
         .color-picker-row {
@@ -472,7 +513,8 @@ function injectStyles() {
     /* 确保二维码容器样式正确 */
     #qrcode-container {
       position: relative;
-      width: 256px;
+      width: 100%;
+      max-width: 256px;
       height: 256px;
       margin: 20px auto;
       background: white;
@@ -482,6 +524,7 @@ function injectStyles() {
       display: flex;
       align-items: center;
       justify-content: center;
+      box-sizing: border-box;
     }
 
     #qrcode-container img {
@@ -527,10 +570,13 @@ function setupCloseHandlers(panel, overlay) {
 function setupCopyHandler(panel, url) {
   const copyBtn = panel.querySelector('.copy-btn');
   const tooltip = panel.querySelector('.tooltip');
+  const urlDisplay = panel.querySelector('#url-display');
   
   copyBtn.addEventListener('click', async () => {
     try {
-      await navigator.clipboard.writeText(url);
+      // 优先使用按钮数据属性中的URL，否则使用当前显示的URL
+      const urlToCopy = copyBtn.dataset.url || urlDisplay.textContent.trim() || url;
+      await navigator.clipboard.writeText(urlToCopy);
       copyBtn.classList.add('copied');
       copyBtn.textContent = chrome.i18n.getMessage("copiedText");
       tooltip.classList.add('show');
@@ -549,18 +595,82 @@ function setupCopyHandler(panel, url) {
       }, 2000);
     }
   });
+  
+  // 当URL改变时，更新按钮数据属性
+  const observer = new MutationObserver(() => {
+    const currentUrl = urlDisplay.textContent.trim();
+    if (currentUrl) {
+      copyBtn.dataset.url = currentUrl;
+    }
+  });
+  
+  observer.observe(urlDisplay, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
 }
 
-  // 设置URL选择功能
-function setupUrlSelection(panel) {
+  // 设置URL编辑功能
+function setupUrlEditor(panel, initialUrl) {
   const urlDisplay = panel.querySelector('#url-display');
-  urlDisplay.addEventListener('click', () => {
+  let currentUrl = initialUrl;
+  
+  // 防抖函数，用于延迟更新二维码
+  let debounceTimer = null;
+  const debounceUpdateQR = (newUrl) => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      if (newUrl && newUrl.trim() !== '') {
+        currentUrl = newUrl.trim();
+        // 重新生成二维码
+        generateQRCode(panel, currentUrl);
+        // 更新复制功能的目标URL
+        const copyBtn = panel.querySelector('.copy-btn');
+        if (copyBtn) {
+          copyBtn.dataset.url = currentUrl;
+        }
+      }
+    }, 500); // 500ms 防抖
+  };
+  
+  // 监听内容变化
+  urlDisplay.addEventListener('input', (e) => {
+    const newUrl = e.target.textContent || e.target.innerText;
+    debounceUpdateQR(newUrl);
+  });
+  
+  // 监听粘贴事件，确保粘贴纯文本
+  urlDisplay.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    document.execCommand('insertText', false, text);
+    debounceUpdateQR(text);
+  });
+  
+  // 双击全选
+  urlDisplay.addEventListener('dblclick', (e) => {
+    e.preventDefault();
     const selection = window.getSelection();
     const range = document.createRange();
     range.selectNodeContents(urlDisplay);
     selection.removeAllRanges();
     selection.addRange(range);
   });
+  
+  // 失去焦点时，如果为空则恢复原URL
+  urlDisplay.addEventListener('blur', () => {
+    const text = urlDisplay.textContent.trim();
+    if (!text) {
+      urlDisplay.textContent = currentUrl;
+    }
+  });
+  
+  // 保存当前URL到按钮数据属性，供复制功能使用
+  const copyBtn = panel.querySelector('.copy-btn');
+  if (copyBtn) {
+    copyBtn.dataset.url = currentUrl;
+  }
 }
 
 // 获取颜色设置
@@ -686,53 +796,55 @@ function injectQRCodePanel(url) {
   // 构建面板内容
   panel.innerHTML = `
     <button class="close-btn">&times;</button>
-    <div id="qrcode-container"></div>
-    <div class="url-container">
-      <div id="url-display" title="${chrome.i18n.getMessage("clickToSelectText")}"></div>
-      <button class="copy-btn">${chrome.i18n.getMessage("copyButtonText")}</button>
-      <div class="tooltip">${chrome.i18n.getMessage("copiedText")}</div>
-    </div>
-    <div class="color-customizer">
-      <button class="color-toggle-btn" id="color-toggle-btn">
-        ${chrome.i18n.getMessage("customizeColor")} <span class="toggle-icon">▼</span>
-      </button>
-      <div class="color-picker-panel" id="color-picker-panel" style="display: none;">
-        <div class="color-picker-row">
-          <label>${chrome.i18n.getMessage("foregroundColor")}:</label>
-          <div class="color-input-group">
-            <input type="color" id="color-dark" value="#000000" class="color-input">
-            <input type="text" id="color-dark-text" value="#000000" class="color-text-input" maxlength="7">
+    <div class="panel-content">
+      <div id="qrcode-container"></div>
+      <div class="url-container">
+        <div id="url-display" contenteditable="true" role="textbox" aria-label="URL" placeholder="${url}"></div>
+        <button class="copy-btn">${chrome.i18n.getMessage("copyButtonText")}</button>
+        <div class="tooltip">${chrome.i18n.getMessage("copiedText")}</div>
+      </div>
+      <div class="color-customizer">
+        <button class="color-toggle-btn" id="color-toggle-btn">
+          ${chrome.i18n.getMessage("customizeColor")} <span class="toggle-icon">▼</span>
+        </button>
+        <div class="color-picker-panel" id="color-picker-panel" style="display: none;">
+          <div class="color-picker-row">
+            <label>${chrome.i18n.getMessage("foregroundColor")}:</label>
+            <div class="color-input-group">
+              <input type="color" id="color-dark" value="#000000" class="color-input">
+              <input type="text" id="color-dark-text" value="#000000" class="color-text-input" maxlength="7">
+            </div>
           </div>
-        </div>
-        <div class="color-picker-row">
-          <label>${chrome.i18n.getMessage("backgroundColor")}:</label>
-          <div class="color-input-group">
-            <input type="color" id="color-light" value="#ffffff" class="color-input">
-            <input type="text" id="color-light-text" value="#ffffff" class="color-text-input" maxlength="7">
+          <div class="color-picker-row">
+            <label>${chrome.i18n.getMessage("backgroundColor")}:</label>
+            <div class="color-input-group">
+              <input type="color" id="color-light" value="#ffffff" class="color-input">
+              <input type="text" id="color-light-text" value="#ffffff" class="color-text-input" maxlength="7">
+            </div>
           </div>
-        </div>
-        <div class="preset-colors">
-          <div class="preset-label">${chrome.i18n.getMessage("presetColors")}:</div>
-          <div class="preset-buttons">
-            <button class="preset-btn" data-dark="#000000" data-light="#ffffff" title="${chrome.i18n.getMessage("classicBlackWhite")}">
-              <span class="preset-color-box" style="background: linear-gradient(135deg, #000000 0%, #000000 50%, #ffffff 50%, #ffffff 100%);"></span>
-            </button>
-            <button class="preset-btn" data-dark="#1a73e8" data-light="#ffffff" title="${chrome.i18n.getMessage("blueTheme")}">
-              <span class="preset-color-box" style="background: linear-gradient(135deg, #1a73e8 0%, #1a73e8 50%, #ffffff 50%, #ffffff 100%);"></span>
-            </button>
-            <button class="preset-btn" data-dark="#34a853" data-light="#ffffff" title="${chrome.i18n.getMessage("greenTheme")}">
-              <span class="preset-color-box" style="background: linear-gradient(135deg, #34a853 0%, #34a853 50%, #ffffff 50%, #ffffff 100%);"></span>
-            </button>
-            <button class="preset-btn" data-dark="#ea4335" data-light="#ffffff" title="${chrome.i18n.getMessage("redTheme")}">
-              <span class="preset-color-box" style="background: linear-gradient(135deg, #ea4335 0%, #ea4335 50%, #ffffff 50%, #ffffff 100%);"></span>
-            </button>
-            <button class="preset-btn" data-dark="#9334e6" data-light="#ffffff" title="${chrome.i18n.getMessage("purpleTheme")}">
-              <span class="preset-color-box" style="background: linear-gradient(135deg, #9334e6 0%, #9334e6 50%, #ffffff 50%, #ffffff 100%);"></span>
-            </button>
+          <div class="preset-colors">
+            <div class="preset-label">${chrome.i18n.getMessage("presetColors")}:</div>
+            <div class="preset-buttons">
+              <button class="preset-btn" data-dark="#000000" data-light="#ffffff" title="${chrome.i18n.getMessage("classicBlackWhite")}">
+                <span class="preset-color-box" style="background: linear-gradient(135deg, #000000 0%, #000000 50%, #ffffff 50%, #ffffff 100%);"></span>
+              </button>
+              <button class="preset-btn" data-dark="#1a73e8" data-light="#ffffff" title="${chrome.i18n.getMessage("blueTheme")}">
+                <span class="preset-color-box" style="background: linear-gradient(135deg, #1a73e8 0%, #1a73e8 50%, #ffffff 50%, #ffffff 100%);"></span>
+              </button>
+              <button class="preset-btn" data-dark="#34a853" data-light="#ffffff" title="${chrome.i18n.getMessage("greenTheme")}">
+                <span class="preset-color-box" style="background: linear-gradient(135deg, #34a853 0%, #34a853 50%, #ffffff 50%, #ffffff 100%);"></span>
+              </button>
+              <button class="preset-btn" data-dark="#ea4335" data-light="#ffffff" title="${chrome.i18n.getMessage("redTheme")}">
+                <span class="preset-color-box" style="background: linear-gradient(135deg, #ea4335 0%, #ea4335 50%, #ffffff 50%, #ffffff 100%);"></span>
+              </button>
+              <button class="preset-btn" data-dark="#9334e6" data-light="#ffffff" title="${chrome.i18n.getMessage("purpleTheme")}">
+                <span class="preset-color-box" style="background: linear-gradient(135deg, #9334e6 0%, #9334e6 50%, #ffffff 50%, #ffffff 100%);"></span>
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="color-actions">
-          <button class="reset-color-btn" id="reset-color-btn">${chrome.i18n.getMessage("resetColor")}</button>
+          <div class="color-actions">
+            <button class="reset-color-btn" id="reset-color-btn">${chrome.i18n.getMessage("resetColor")}</button>
+          </div>
         </div>
       </div>
     </div>
@@ -750,8 +862,8 @@ function injectQRCodePanel(url) {
   // 设置复制功能
   setupCopyHandler(panel, url);
   
-  // 设置URL选择功能
-  setupUrlSelection(panel);
+  // 设置URL编辑功能
+  setupUrlEditor(panel, url);
   
   // 设置颜色选择器
   setupColorCustomizer(panel, url);

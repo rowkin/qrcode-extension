@@ -851,6 +851,12 @@ function savePaddingSettings(padding) {
 // 生成带留白的二维码
 async function generateQRCodeWithPadding(canvas, url, colorDark, colorLight, padding) {
   return new Promise((resolve, reject) => {
+    // 验证 URL
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+      reject(new Error('Invalid URL: URL is empty or invalid'));
+      return;
+    }
+    
     // 创建临时容器生成二维码
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'absolute';
@@ -861,11 +867,65 @@ async function generateQRCodeWithPadding(canvas, url, colorDark, colorLight, pad
     
     let qrCodeInstance = null;
     let resolved = false;
+    let checkImageInterval = null;
+    
+    // 统一的图片处理函数
+    const processQRImage = (qrImg) => {
+      if (resolved) return;
+      
+      try {
+        const ctx = canvas.getContext('2d');
+        const paddingPx = Math.round((padding / 100) * 256);
+        const totalSize = 256 + paddingPx * 2;
+        
+        canvas.width = totalSize;
+        canvas.height = totalSize;
+        
+        // 绘制背景色
+        ctx.fillStyle = colorLight;
+        ctx.fillRect(0, 0, totalSize, totalSize);
+        
+        // 绘制二维码（居中，带留白）
+        ctx.drawImage(qrImg, paddingPx, paddingPx, 256, 256);
+        
+        resolved = true;
+        if (checkImageInterval) {
+          clearInterval(checkImageInterval);
+        }
+        if (tempContainer.parentNode) {
+          document.body.removeChild(tempContainer);
+        }
+        resolve();
+      } catch (error) {
+        if (tempContainer.parentNode) {
+          document.body.removeChild(tempContainer);
+        }
+        if (checkImageInterval) {
+          clearInterval(checkImageInterval);
+        }
+        reject(error);
+      }
+    };
+    
+    // 备用检查机制：即使 onRender 没有触发，也检查图片
+    const startImageCheck = () => {
+      if (checkImageInterval) return; // 避免重复启动
+      
+      checkImageInterval = setInterval(() => {
+        const qrImg = tempContainer.querySelector('img');
+        if (qrImg && qrImg.complete && qrImg.naturalWidth > 0) {
+          processQRImage(qrImg);
+        }
+      }, 100);
+    };
     
     // 超时处理
     const timeout = setTimeout(() => {
       if (!resolved) {
         resolved = true;
+        if (checkImageInterval) {
+          clearInterval(checkImageInterval);
+        }
         if (tempContainer.parentNode) {
           document.body.removeChild(tempContainer);
         }
@@ -874,69 +934,57 @@ async function generateQRCodeWithPadding(canvas, url, colorDark, colorLight, pad
     }, 10000);
     
     try {
+      // 立即开始检查（备用机制）
+      setTimeout(() => startImageCheck(), 200);
+      
       qrCodeInstance = new QRCode(tempContainer, {
-        text: url,
+        text: url.trim(),
         width: 256,
         height: 256,
         colorDark: colorDark,
         colorLight: colorLight,
         correctLevel: QRCode.CorrectLevel.H,
         onRender: () => {
-          // 使用轮询检查图片是否已加载
-          const checkImage = setInterval(() => {
-            const qrImg = tempContainer.querySelector('img');
-            if (qrImg && qrImg.complete && qrImg.naturalWidth > 0) {
-              clearInterval(checkImage);
-              clearTimeout(timeout);
-              
-              if (resolved) return;
-              resolved = true;
-              
-              try {
-                const ctx = canvas.getContext('2d');
-                const paddingPx = Math.round((padding / 100) * 256);
-                const totalSize = 256 + paddingPx * 2;
-                
-                canvas.width = totalSize;
-                canvas.height = totalSize;
-                
-                // 绘制背景色
-                ctx.fillStyle = colorLight;
-                ctx.fillRect(0, 0, totalSize, totalSize);
-                
-                // 绘制二维码（居中，带留白）
-                ctx.drawImage(qrImg, paddingPx, paddingPx, 256, 256);
-                
-                // 清理临时容器
-                if (tempContainer.parentNode) {
-                  document.body.removeChild(tempContainer);
-                }
-                resolve();
-              } catch (error) {
-                if (tempContainer.parentNode) {
-                  document.body.removeChild(tempContainer);
-                }
-                reject(error);
-              }
-            }
-          }, 50);
+          // onRender 触发时，确保检查已启动
+          if (!checkImageInterval) {
+            startImageCheck();
+          }
           
-          // 5秒后如果还没加载完，清除检查
-          setTimeout(() => {
-            clearInterval(checkImage);
-            if (!resolved) {
-              resolved = true;
-              clearTimeout(timeout);
-              if (tempContainer.parentNode) {
-                document.body.removeChild(tempContainer);
-              }
-              reject(new Error('QR code image load timeout'));
+          // 立即检查一次
+          const qrImg = tempContainer.querySelector('img');
+          if (qrImg) {
+            // 如果图片已加载，直接处理
+            if (qrImg.complete && qrImg.naturalWidth > 0) {
+              processQRImage(qrImg);
+            } else {
+              // 否则等待图片加载
+              qrImg.onload = () => {
+                if (!resolved) {
+                  processQRImage(qrImg);
+                }
+              };
+              qrImg.onerror = () => {
+                if (!resolved) {
+                  resolved = true;
+                  if (checkImageInterval) {
+                    clearInterval(checkImageInterval);
+                  }
+                  clearTimeout(timeout);
+                  if (tempContainer.parentNode) {
+                    document.body.removeChild(tempContainer);
+                  }
+                  reject(new Error('QR code image load error'));
+                }
+              };
             }
-          }, 5000);
+          }
         }
       });
     } catch (error) {
       clearTimeout(timeout);
+      if (checkImageInterval) {
+        clearInterval(checkImageInterval);
+      }
       if (tempContainer.parentNode) {
         document.body.removeChild(tempContainer);
       }

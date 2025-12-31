@@ -46,5 +46,49 @@
   "loadingText": {
     "message": "Generating QR Code...",
     "description": "Text shown while generating QR code"
+  },
+  "customizeColor": {
+    "message": "Customize Color",
+    "description": "Customize color button text"
+  },
+  "foregroundColor": {
+    "message": "Foreground Color",
+    "description": "Foreground color label"
+  },
+  "backgroundColor": {
+    "message": "Background Color",
+    "description": "Background color label"
+  },
+  "resetColor": {
+    "message": "Reset",
+    "description": "Reset color button"
+  },
+  "applyColor": {
+    "message": "Apply",
+    "description": "Apply color button"
+  },
+  "presetColors": {
+    "message": "Preset Colors",
+    "description": "Preset colors title"
+  },
+  "classicBlackWhite": {
+    "message": "Classic Black & White",
+    "description": "Classic black and white preset"
+  },
+  "blueTheme": {
+    "message": "Blue Theme",
+    "description": "Blue theme preset"
+  },
+  "greenTheme": {
+    "message": "Green Theme",
+    "description": "Green theme preset"
+  },
+  "redTheme": {
+    "message": "Red Theme",
+    "description": "Red theme preset"
+  },
+  "purpleTheme": {
+    "message": "Purple Theme",
+    "description": "Purple theme preset"
   }
 }

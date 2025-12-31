@@ -200,6 +200,171 @@ function injectStyles() {
       }
       
       /* 移动端适配 */
+      .color-customizer {
+        margin-top: 15px;
+        border-top: 1px solid #e0e0e0;
+        padding-top: 15px;
+      }
+      
+      .color-toggle-btn {
+        width: 100%;
+        padding: 8px 12px;
+        background: #f5f5f5;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #5f6368;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s;
+      }
+      
+      .color-toggle-btn:hover {
+        background: #e8eaed;
+      }
+      
+      .toggle-icon {
+        transition: transform 0.3s;
+        font-size: 10px;
+      }
+      
+      .color-toggle-btn.expanded .toggle-icon {
+        transform: rotate(180deg);
+      }
+      
+      .color-picker-panel {
+        margin-top: 12px;
+        padding: 12px;
+        background: #fafafa;
+        border-radius: 4px;
+        animation: slideDown 0.3s ease;
+      }
+      
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .color-picker-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      
+      .color-picker-row label {
+        width: 80px;
+        font-size: 13px;
+        color: #5f6368;
+        flex-shrink: 0;
+      }
+      
+      .color-input-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+      }
+      
+      .color-input {
+        width: 50px;
+        height: 32px;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 0;
+      }
+      
+      .color-text-input {
+        flex: 1;
+        padding: 6px 8px;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        font-size: 13px;
+        font-family: monospace;
+        min-width: 0;
+      }
+      
+      .color-text-input:focus {
+        outline: none;
+        border-color: #1a73e8;
+      }
+      
+      .preset-colors {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #e0e0e0;
+      }
+      
+      .preset-label {
+        font-size: 12px;
+        color: #5f6368;
+        margin-bottom: 8px;
+      }
+      
+      .preset-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      
+      .preset-btn {
+        width: 36px;
+        height: 36px;
+        border: 2px solid #dadce0;
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 2px;
+        background: white;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .preset-btn:hover {
+        border-color: #1a73e8;
+        transform: scale(1.1);
+      }
+      
+      .preset-color-box {
+        width: 100%;
+        height: 100%;
+        border-radius: 2px;
+        display: block;
+      }
+      
+      .color-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      
+      .reset-color-btn {
+        padding: 6px 16px;
+        background: white;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #5f6368;
+        transition: all 0.2s;
+      }
+      
+      .reset-color-btn:hover {
+        background: #f5f5f5;
+        border-color: #1a73e8;
+        color: #1a73e8;
+      }
+      
       @media (max-width: 768px) {
         #qrcode-floating-panel {
           width: 90%;
@@ -214,6 +379,20 @@ function injectStyles() {
         #qrcode-container {
           width: 100%;
           max-width: 256px;
+        }
+        
+        .color-picker-row {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .color-picker-row label {
+          width: 100%;
+          margin-bottom: 6px;
+        }
+        
+        .color-input-group {
+          width: 100%;
         }
       }
     `;
@@ -384,9 +563,39 @@ function setupUrlSelection(panel) {
   });
 }
 
+// 获取颜色设置
+async function getColorSettings() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['qrColorDark', 'qrColorLight'], (result) => {
+      resolve({
+        colorDark: result.qrColorDark || '#000000',
+        colorLight: result.qrColorLight || '#ffffff'
+      });
+    });
+  });
+}
+
+// 保存颜色设置
+function saveColorSettings(colorDark, colorLight) {
+  chrome.storage.local.set({
+    qrColorDark: colorDark,
+    qrColorLight: colorLight
+  });
+}
+
 // 生成二维码
-function generateQRCode(panel, url) {
+async function generateQRCode(panel, url, colorDark = null, colorLight = null) {
   const container = panel.querySelector('#qrcode-container');
+  
+  // 获取颜色设置
+  if (!colorDark || !colorLight) {
+    const colors = await getColorSettings();
+    colorDark = colorDark || colors.colorDark;
+    colorLight = colorLight || colors.colorLight;
+  }
+  
+  // 清空容器
+  container.innerHTML = '';
   
   // 创建加载状态元素
   const loadingState = document.createElement('div');
@@ -400,12 +609,6 @@ function generateQRCode(panel, url) {
     <span class="loading-text">${chrome.i18n.getMessage("loadingText") || '正在生成二维码...'}</span>
   `;
 
-  // 创建二维码容器
-  const qrcodeDiv = document.createElement('div');
-  qrcodeDiv.className = 'qrcode-inner';
-  
-  // 添加到主容器
-  container.appendChild(qrcodeDiv);
   container.appendChild(loadingState);
 
   setTimeout(() => {
@@ -415,8 +618,8 @@ function generateQRCode(panel, url) {
         text: url,
         width: 256,
         height: 256,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
+        colorDark: colorDark,
+        colorLight: colorLight,
         correctLevel: QRCode.CorrectLevel.H,
         onRender: () => {
           // 二维码渲染完成后
@@ -489,6 +692,50 @@ function injectQRCodePanel(url) {
       <button class="copy-btn">${chrome.i18n.getMessage("copyButtonText")}</button>
       <div class="tooltip">${chrome.i18n.getMessage("copiedText")}</div>
     </div>
+    <div class="color-customizer">
+      <button class="color-toggle-btn" id="color-toggle-btn">
+        ${chrome.i18n.getMessage("customizeColor")} <span class="toggle-icon">▼</span>
+      </button>
+      <div class="color-picker-panel" id="color-picker-panel" style="display: none;">
+        <div class="color-picker-row">
+          <label>${chrome.i18n.getMessage("foregroundColor")}:</label>
+          <div class="color-input-group">
+            <input type="color" id="color-dark" value="#000000" class="color-input">
+            <input type="text" id="color-dark-text" value="#000000" class="color-text-input" maxlength="7">
+          </div>
+        </div>
+        <div class="color-picker-row">
+          <label>${chrome.i18n.getMessage("backgroundColor")}:</label>
+          <div class="color-input-group">
+            <input type="color" id="color-light" value="#ffffff" class="color-input">
+            <input type="text" id="color-light-text" value="#ffffff" class="color-text-input" maxlength="7">
+          </div>
+        </div>
+        <div class="preset-colors">
+          <div class="preset-label">${chrome.i18n.getMessage("presetColors")}:</div>
+          <div class="preset-buttons">
+            <button class="preset-btn" data-dark="#000000" data-light="#ffffff" title="${chrome.i18n.getMessage("classicBlackWhite")}">
+              <span class="preset-color-box" style="background: linear-gradient(135deg, #000000 0%, #000000 50%, #ffffff 50%, #ffffff 100%);"></span>
+            </button>
+            <button class="preset-btn" data-dark="#1a73e8" data-light="#ffffff" title="${chrome.i18n.getMessage("blueTheme")}">
+              <span class="preset-color-box" style="background: linear-gradient(135deg, #1a73e8 0%, #1a73e8 50%, #ffffff 50%, #ffffff 100%);"></span>
+            </button>
+            <button class="preset-btn" data-dark="#34a853" data-light="#ffffff" title="${chrome.i18n.getMessage("greenTheme")}">
+              <span class="preset-color-box" style="background: linear-gradient(135deg, #34a853 0%, #34a853 50%, #ffffff 50%, #ffffff 100%);"></span>
+            </button>
+            <button class="preset-btn" data-dark="#ea4335" data-light="#ffffff" title="${chrome.i18n.getMessage("redTheme")}">
+              <span class="preset-color-box" style="background: linear-gradient(135deg, #ea4335 0%, #ea4335 50%, #ffffff 50%, #ffffff 100%);"></span>
+            </button>
+            <button class="preset-btn" data-dark="#9334e6" data-light="#ffffff" title="${chrome.i18n.getMessage("purpleTheme")}">
+              <span class="preset-color-box" style="background: linear-gradient(135deg, #9334e6 0%, #9334e6 50%, #ffffff 50%, #ffffff 100%);"></span>
+            </button>
+          </div>
+        </div>
+        <div class="color-actions">
+          <button class="reset-color-btn" id="reset-color-btn">${chrome.i18n.getMessage("resetColor")}</button>
+        </div>
+      </div>
+    </div>
   `;
   
   document.body.appendChild(overlay);
@@ -505,6 +752,9 @@ function injectQRCodePanel(url) {
   
   // 设置URL选择功能
   setupUrlSelection(panel);
+  
+  // 设置颜色选择器
+  setupColorCustomizer(panel, url);
   
   // 生成二维码
   generateQRCode(panel, url);
@@ -594,5 +844,96 @@ function setupDownloadHandler(panel) {
   // 将下载按钮添加到容器
   downloadContainer.appendChild(downloadBtn);
   qrcodeContainer.appendChild(downloadContainer);
+}
+
+// 设置颜色自定义器
+async function setupColorCustomizer(panel, url) {
+  const toggleBtn = panel.querySelector('#color-toggle-btn');
+  const colorPanel = panel.querySelector('#color-picker-panel');
+  const colorDarkInput = panel.querySelector('#color-dark');
+  const colorDarkText = panel.querySelector('#color-dark-text');
+  const colorLightInput = panel.querySelector('#color-light');
+  const colorLightText = panel.querySelector('#color-light-text');
+  const resetBtn = panel.querySelector('#reset-color-btn');
+  const presetBtns = panel.querySelectorAll('.preset-btn');
+  
+  // 加载保存的颜色设置
+  const colors = await getColorSettings();
+  colorDarkInput.value = colors.colorDark;
+  colorDarkText.value = colors.colorDark;
+  colorLightInput.value = colors.colorLight;
+  colorLightText.value = colors.colorLight;
+  
+  // 防抖函数
+  let debounceTimer = null;
+  const debounceGenerate = (dark, light) => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      generateQRCode(panel, url, dark, light);
+      saveColorSettings(dark, light);
+    }, 300);
+  };
+  
+  // 切换颜色面板显示
+  toggleBtn.addEventListener('click', () => {
+    const isExpanded = colorPanel.style.display !== 'none';
+    colorPanel.style.display = isExpanded ? 'none' : 'block';
+    toggleBtn.classList.toggle('expanded', !isExpanded);
+  });
+  
+  // 颜色选择器变化
+  colorDarkInput.addEventListener('input', (e) => {
+    const value = e.target.value;
+    colorDarkText.value = value;
+    debounceGenerate(value, colorLightInput.value);
+  });
+  
+  colorLightInput.addEventListener('input', (e) => {
+    const value = e.target.value;
+    colorLightText.value = value;
+    debounceGenerate(colorDarkInput.value, value);
+  });
+  
+  // 文本输入变化
+  colorDarkText.addEventListener('input', (e) => {
+    const value = e.target.value;
+    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+      colorDarkInput.value = value;
+      debounceGenerate(value, colorLightInput.value);
+    }
+  });
+  
+  colorLightText.addEventListener('input', (e) => {
+    const value = e.target.value;
+    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+      colorLightInput.value = value;
+      debounceGenerate(colorDarkInput.value, value);
+    }
+  });
+  
+  // 预设颜色按钮
+  presetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dark = btn.dataset.dark;
+      const light = btn.dataset.light;
+      colorDarkInput.value = dark;
+      colorDarkText.value = dark;
+      colorLightInput.value = light;
+      colorLightText.value = light;
+      debounceGenerate(dark, light);
+    });
+  });
+  
+  // 重置按钮
+  resetBtn.addEventListener('click', () => {
+    const defaultDark = '#000000';
+    const defaultLight = '#ffffff';
+    colorDarkInput.value = defaultDark;
+    colorDarkText.value = defaultDark;
+    colorLightInput.value = defaultLight;
+    colorLightText.value = defaultLight;
+    generateQRCode(panel, url, defaultDark, defaultLight);
+    saveColorSettings(defaultDark, defaultLight);
+  });
 }
 

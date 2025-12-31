@@ -46,5 +46,49 @@
   "loadingText": {
     "message": "QRコードを生成中...",
     "description": "QRコード生成中のテキスト"
+  },
+  "customizeColor": {
+    "message": "色をカスタマイズ",
+    "description": "色をカスタマイズボタンのテキスト"
+  },
+  "foregroundColor": {
+    "message": "前景色",
+    "description": "前景色ラベル"
+  },
+  "backgroundColor": {
+    "message": "背景色",
+    "description": "背景色ラベル"
+  },
+  "resetColor": {
+    "message": "リセット",
+    "description": "色をリセットボタン"
+  },
+  "applyColor": {
+    "message": "適用",
+    "description": "色を適用ボタン"
+  },
+  "presetColors": {
+    "message": "プリセット色",
+    "description": "プリセット色タイトル"
+  },
+  "classicBlackWhite": {
+    "message": "クラシック 黒白",
+    "description": "クラシック 黒白プリセット"
+  },
+  "blueTheme": {
+    "message": "ブルーテーマ",
+    "description": "ブルーテーマプリセット"
+  },
+  "greenTheme": {
+    "message": "グリーンテーマ",
+    "description": "グリーンテーマプリセット"
+  },
+  "redTheme": {
+    "message": "レッドテーマ",
+    "description": "レッドテーマプリセット"
+  },
+  "purpleTheme": {
+    "message": "パープルテーマ",
+    "description": "パープルテーマプリセット"
   }
 }

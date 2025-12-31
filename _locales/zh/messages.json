@@ -46,5 +46,49 @@
   "loadingText": {
     "message": "正在生成二维码...",
     "description": "生成二维码时显示的文本"
+  },
+  "customizeColor": {
+    "message": "自定义颜色",
+    "description": "自定义颜色按钮文本"
+  },
+  "foregroundColor": {
+    "message": "前景色",
+    "description": "前景色标签"
+  },
+  "backgroundColor": {
+    "message": "背景色",
+    "description": "背景色标签"
+  },
+  "resetColor": {
+    "message": "重置",
+    "description": "重置颜色按钮"
+  },
+  "applyColor": {
+    "message": "应用",
+    "description": "应用颜色按钮"
+  },
+  "presetColors": {
+    "message": "预设颜色",
+    "description": "预设颜色标题"
+  },
+  "classicBlackWhite": {
+    "message": "经典黑白",
+    "description": "经典黑白预设"
+  },
+  "blueTheme": {
+    "message": "蓝色主题",
+    "description": "蓝色主题预设"
+  },
+  "greenTheme": {
+    "message": "绿色主题",
+    "description": "绿色主题预设"
+  },
+  "redTheme": {
+    "message": "红色主题",
+    "description": "红色主题预设"
+  },
+  "purpleTheme": {
+    "message": "紫色主题",
+    "description": "紫色主题预设"
   }
 }

@@ -55,9 +55,9 @@ Local development — quick guide
    - Use the extension icon or right-click menu to trigger QR generation
 
 3. Edit & debug:
-   - Content script: `package/content-script.js`
-   - Background/service worker: `package/background.js`
-   - Popup: `package/popup.html`, `package/popup.js`
+   - Content script: `src/content-script.js`
+   - Background/service worker: `src/background.js`
+   - Popup: `src/popup.html`, `src/popup.js`
    - Styles are injected by `injectStyles()` in `content-script.js`
    - Logs:
      - Content-script logs appear in the page's DevTools console.
@@ -116,10 +116,10 @@ Developer conventions & notes
 - Add strings to `_locales/*/messages.json` when adding UI text — keep translations in sync.
 
 Files of interest
-- `package/content-script.js` — main UI injection & QR generation
-- `package/background.js` — context menu + injection logic
-- `package/qrcode.min.js` — QR generation library (third-party)
-- `scripts/bump_version.sh` — release / pack helper
+- `src/content-script.js` — main UI injection & QR generation
+- `src/background.js` — context menu + injection logic
+- `src/qrcode.min.js` — QR generation library (third-party)
+- `scripts/bump_version.sh` — release / pack helper (now reads from `src/`)
 - `scripts/deploy-docs.js`, `scripts/deploy-hook.sh` — docs deployment helpers
 
 If you want, I can:

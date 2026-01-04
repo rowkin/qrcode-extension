@@ -5,6 +5,9 @@ set -e
 
 # 获取项目根目录的绝对路径
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# canonical source directory (can be overridden by environment)
+SRC_DIR="${SRC_DIR:-src}"
+SRC_PATH="$ROOT_DIR/$SRC_DIR"
 
 # 解析命令行参数
 PACK_ONLY=false
@@ -88,7 +91,7 @@ load_config() {
 # 函数：更新manifest.json版本号
 update_manifest_version() {
     local version="$1"
-    local manifest_file="$ROOT_DIR/manifest.json"
+    local manifest_file="$SRC_PATH/manifest.json"
     
     if [ ! -f "$manifest_file" ]; then
         echo "Error: manifest.json not found at $manifest_file"
@@ -107,147 +110,101 @@ update_manifest_version() {
 # 函数：创建发布包
 create_release_package() {
     local version="$1"
-    
-    # 使用 Node.js 解析配置
-    local config_json=$(node -e "
-        try {
-            const fs = require('fs');
-            const path = require('path');
-            const configPath = path.join('$ROOT_DIR', '.extensionrc');
-            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-            console.log(JSON.stringify(config));
-        } catch (error) {
-            // 使用默认配置
-            console.log(JSON.stringify({
-                name: 'qrcode-extension',
-                files: {
-                    required: ['manifest.json', 'popup.html', 'popup.js', 'qrcode.min.js'],
-                    optional: ['background.js', 'content-script.js'],
-                    directories: ['icons', '_locales', 'lib', 'styles'],
-                    documentation: ['README.md', 'README-zh.md', 'LICENSE']
-                }
-            }));
-        }
-    ")
-    
-    # 从配置中获取值
+    local config_file="$ROOT_DIR/.extensionrc"
+
+    # 解析配置（如果存在）
+    local config_json
+    if [ -f "$config_file" ]; then
+        config_json=$(node -e "console.log(JSON.stringify(JSON.parse(require('fs').readFileSync('$config_file','utf8'))))")
+    else
+        # 默认配置
+        config_json=$(cat <<'JSON'
+{
+  "name":"qrcode-extension",
+  "files":{
+    "required":["manifest.json","popup.html","popup.js","qrcode.min.js"],
+    "optional":["background.js","content-script.js"],
+    "directories":["icons","_locales","lib","styles"],
+    "documentation":["README.md","README-zh.md","LICENSE"]
+  }
+}
+JSON
+)
+    fi
+
     local dist_dir="$ROOT_DIR/dist"
     local name="qrcode-extension"
     local release_dir="$dist_dir/$name-v$version"
     local zip_file="$dist_dir/$name-v$version.zip"
-    
+
     echo "Creating release package..."
-    
-    # 清理输出目录
     rm -rf "$dist_dir"
     mkdir -p "$release_dir"
-    
-    # 复制文件
-    echo "Copying files..."
-    
-    # 使用 Node.js 解析文件列表
-    local files_list=$(node -e "
-        const config = $config_json;
-        const files = config.files;
-        console.log(JSON.stringify({
-            required: files.required || [],
-            optional: files.optional || [],
-            directories: files.directories || [],
-            documentation: files.documentation || []
-        }));
-    ")
-    
-    # 解析文件列表到数组
-    local required_files=($(node -e "
-        const files = $files_list;
-        console.log(files.required.join(' '));
-    "))
-    
-    local optional_files=($(node -e "
-        const files = $files_list;
-        console.log(files.optional.join(' '));
-    "))
-    
-    local directories=($(node -e "
-        const files = $files_list;
-        console.log(files.directories.join(' '));
-    "))
-    
-    local docs=($(node -e "
-        const files = $files_list;
-        console.log(files.documentation.join(' '));
-    "))
-    
-    # 调试输出
+
+    # 解析文件列表
+    local required_files=($(node -e "const c=$config_json; console.log((c.files.required||[]).join(' '))"))
+    local optional_files=($(node -e "const c=$config_json; console.log((c.files.optional||[]).join(' '))"))
+    local directories=($(node -e "const c=$config_json; console.log((c.files.directories||[]).join(' '))"))
+    local docs=($(node -e "const c=$config_json; console.log((c.files.documentation||[]).join(' '))"))
+
     echo "Debug: Required files: ${required_files[*]}"
     echo "Debug: Optional files: ${optional_files[*]}"
     echo "Debug: Directories: ${directories[*]}"
     echo "Debug: Documentation: ${docs[*]}"
-    
-    # 复制必需文件
+
+    # 复制必需文件和可选文件，从 SRC_PATH 而非 ROOT_DIR
     for file in "${required_files[@]}"; do
-        if [ -f "$ROOT_DIR/$file" ]; then
+        if [ -f "$SRC_PATH/$file" ]; then
             echo "Copying required file: $file"
-            cp "$ROOT_DIR/$file" "$release_dir/"
-            echo "Successfully copied: $file"
+            cp "$SRC_PATH/$file" "$release_dir/"
         else
-            echo "Error: Required file $file not found at $ROOT_DIR/$file"
+            echo "Error: Required file $file not found at $SRC_PATH/$file"
             exit 1
         fi
     done
-    
-    # 复制可选文件
+
     for file in "${optional_files[@]}"; do
-        if [ -f "$ROOT_DIR/$file" ]; then
+        if [ -f "$SRC_PATH/$file" ]; then
             echo "Copying optional file: $file"
-            cp "$ROOT_DIR/$file" "$release_dir/"
-            echo "Successfully copied optional file: $file"
+            cp "$SRC_PATH/$file" "$release_dir/"
         else
-            echo "Note: Optional file $file not found, skipping..."
+            echo "Note: Optional file $file not found in $SRC_PATH, skipping..."
         fi
     done
-    
+
     # 复制目录
     for dir in "${directories[@]}"; do
-        if [ -d "$ROOT_DIR/$dir" ]; then
+        if [ -d "$SRC_PATH/$dir" ]; then
             echo "Copying directory: $dir"
-            cp -r "$ROOT_DIR/$dir" "$release_dir/"
-            echo "Successfully copied directory: $dir"
+            cp -r "$SRC_PATH/$dir" "$release_dir/"
         else
-            echo "Note: Directory $dir not found, skipping..."
+            echo "Note: Directory $dir not found in $SRC_PATH, skipping..."
         fi
     done
-    
-    # 复制文档
+
+    # 复制文档（从 root）
     for doc in "${docs[@]}"; do
         if [ -f "$ROOT_DIR/$doc" ]; then
             echo "Copying documentation: $doc"
             cp "$ROOT_DIR/$doc" "$release_dir/"
-            echo "Successfully copied documentation: $doc"
         fi
     done
-    
-    # 显示打包前的目录内容
+
     echo "Contents of release directory before zipping:"
     ls -la "$release_dir"
-    
-    # 创建压缩包
+
     echo "Creating archive..."
     (
         cd "$dist_dir" || exit 1
-        rm -f "$zip_file"  # 确保之前的 zip 文件被删除
+        rm -f "$(basename "$zip_file")"
         zip -r "$(basename "$zip_file")" "$(basename "$release_dir")"
     )
-    
-    # 验证 zip 文件
+
     if [ -f "$zip_file" ]; then
         echo "Package contents:"
         unzip -l "$zip_file"
-        
         local size=$(du -h "$zip_file" | cut -f1)
         echo "Package size: $size"
-        
-        # 验证 MD5
         if command -v md5sum >/dev/null 2>&1; then
             echo "MD5: $(md5sum "$zip_file" | cut -d' ' -f1)"
         elif command -v md5 >/dev/null 2>&1; then
@@ -277,9 +234,9 @@ main() {
     check_command node
     check_command zip
     
-    # 检查必需文件
-    check_file "$ROOT_DIR/package.json"
-    check_file "$ROOT_DIR/manifest.json"
+    # 检查必需文件（来自 SRC_PATH）
+    check_file "$SRC_PATH/package.json"
+    check_file "$SRC_PATH/manifest.json"
     
     # 检查并安装依赖
     if [ ! -d "$ROOT_DIR/node_modules" ]; then

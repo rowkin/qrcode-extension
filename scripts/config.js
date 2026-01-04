@@ -4,6 +4,8 @@ const path = require('path');
 function loadConfig(rootDir) {
     const defaultConfig = {
         name: 'qrcode-extension',
+        // canonical source directory for runtime extension files
+        sourceDir: 'src',
         files: {
             required: [
                 'manifest.json',

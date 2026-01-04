@@ -30,7 +30,7 @@ function injectStyles() {
     const style = document.createElement('style');
     style.id = 'qrcode-style';
     style.textContent = `
-      #qrcode-floating-panel {
+    #qrcode-floating-panel {
         position: fixed;
         top: 50%;
         left: 50%;
@@ -43,6 +43,22 @@ function injectStyles() {
         text-align: center;
         min-width: 300px;
         animation: fadeIn 0.3s ease;
+        /* constrain to viewport and use column layout so header stays visible */
+        max-height: calc(100vh - 40px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .panel-content {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+        box-sizing: border-box;
+        /* make settings area scrollable when viewport is small */
+        max-height: calc(100vh - 160px);
+        overflow: auto;
+        padding-right: 8px;
       }
       
       #qrcode-floating-panel .close-btn {
@@ -64,18 +80,6 @@ function injectStyles() {
         color: #333;
       }
       
-      #qrcode-container {
-        margin: 20px auto;
-        padding: 10px;
-        background: white;
-        width: 256px;
-        height: 256px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        overflow: hidden;
-        position: relative;
-      }
-      
       .url-container {
         width: 256px;
         margin: 10px auto;
@@ -84,7 +88,7 @@ function injectStyles() {
         align-items: flex-start;
         background: #f5f5f5;
         border-radius: 4px;
-        padding: 8px 8px 20px;
+        padding: 8px 8px 40px;
         box-sizing: border-box;
       }
       
@@ -97,18 +101,17 @@ function injectStyles() {
         cursor: text;
         user-select: all;
         padding: 4px;
-        margin-right: 8px;
         min-height: 20px;
       }
       
       .copy-btn {
         position: absolute;
-        bottom: 0;
-        right: 0;
+        bottom: 8px;
+        right: 8px;
         background: #1a73e8;
         color: white;
         border: none;
-        padding: 4px 12px;
+        padding: 4px 10px;
         border-radius: 4px;
         cursor: pointer;
         font-size: 12px;
@@ -292,18 +295,22 @@ function injectStyles() {
 
     /* 确保二维码容器样式正确 */
     #qrcode-container {
-      position: relative;
-      width: 256px;
-      height: 256px;
-      margin: 20px auto;
-      background: white;
-      border: 1px solid #dadce0;
-      border-radius: 4px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        position: relative;
+        width: 256px;
+        height: 256px;
+        margin: 20px auto;
+        padding: 0px;
+        background: white;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        /* allow internal scroll when the QR canvas/image is larger than visible area */
+        overflow: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-height: 50vh;
+        box-sizing: border-box;
+      }
 
     #qrcode-container img {
       display: block;
@@ -483,11 +490,13 @@ function injectQRCodePanel(url) {
   // 构建面板内容
   panel.innerHTML = `
     <button class="close-btn">&times;</button>
-    <div id="qrcode-container"></div>
-    <div class="url-container">
-      <div id="url-display" title="${chrome.i18n.getMessage("clickToSelectText")}"></div>
-      <button class="copy-btn">${chrome.i18n.getMessage("copyButtonText")}</button>
-      <div class="tooltip">${chrome.i18n.getMessage("copiedText")}</div>
+    <div class="panel-content">
+      <div id="qrcode-container"></div>
+      <div class="url-container">
+        <div id="url-display" title="${chrome.i18n.getMessage("clickToSelectText")}"></div>
+        <button class="copy-btn">${chrome.i18n.getMessage("copyButtonText")}</button>
+        <div class="tooltip">${chrome.i18n.getMessage("copiedText")}</div>
+      </div>
     </div>
   `;
   

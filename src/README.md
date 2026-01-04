@@ -25,6 +25,11 @@ A simple and user-friendly Chrome extension for quickly generating QR codes from
   - Close panel via overlay or close button
   - ESC key shortcut to close
   - One-click QR code download
+  - **Custom QR code colors** (v1.0.5 new)
+    - Customize foreground and background colors
+    - 5 preset color themes
+    - Real-time color preview
+    - Auto-save color settings
 
 - Multi-language Support:
   - English
@@ -99,9 +104,21 @@ A simple and user-friendly Chrome extension for quickly generating QR codes from
 - Edge 88+
 - Other Chromium-based browsers 88+
 
+## Changelog
+
+### v1.0.5 (2024-12-30)
+- ✅ **New Feature**: Custom QR code colors
+  - Customize foreground and background colors
+  - 5 preset color themes
+  - Real-time color preview
+  - Auto-save color settings
+
+### v1.0.4
+- Initial release
+
 ## Future Plans
 
-- [ ] Custom QR code colors
+- [x] Custom QR code colors (v1.0.5)
 - [ ] Adjustable QR code size
 - [ ] QR code preview feature
 - [ ] Additional language support

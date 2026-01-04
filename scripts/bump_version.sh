@@ -234,9 +234,20 @@ main() {
     check_command node
     check_command zip
     
-    # 检查必需文件（来自 SRC_PATH）
-    check_file "$SRC_PATH/package.json"
-    check_file "$SRC_PATH/manifest.json"
+    # 检查必需文件（优先来自 SRC_PATH，否则回退到 ROOT_DIR）
+    if [ -f "$SRC_PATH/package.json" ]; then
+        check_file "$SRC_PATH/package.json"
+    else
+        echo "Warning: $SRC_PATH/package.json not found, falling back to $ROOT_DIR/package.json"
+        check_file "$ROOT_DIR/package.json"
+    fi
+
+    if [ -f "$SRC_PATH/manifest.json" ]; then
+        check_file "$SRC_PATH/manifest.json"
+    else
+        echo "Warning: $SRC_PATH/manifest.json not found, falling back to $ROOT_DIR/manifest.json"
+        check_file "$ROOT_DIR/manifest.json"
+    fi
     
     # 检查并安装依赖
     if [ ! -d "$ROOT_DIR/node_modules" ]; then

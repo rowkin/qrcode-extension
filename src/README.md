@@ -106,6 +106,25 @@ A simple and user-friendly Chrome extension for quickly generating QR codes from
 
 ## Changelog
 
+### v1.0.6 (2026-01-06)
+- ✅ **UI Redesign**: Split-panel layout optimization
+  - Left panel: QR code display with title and version
+  - Right panel: Settings with fixed header/footer and scrollable content
+  - Improved visual hierarchy and spacing
+- ✅ **New Feature**: QR code padding control
+  - Adjustable padding/margin (0-100)
+  - 4 preset padding options (None/Small/Medium/Large)
+  - Real-time preview
+- ✅ **Enhanced UX**:
+  - Added "QR Code Generator" title in left panel
+  - Display version number (v1.0.6) in footer
+  - Improved layout alignment and spacing
+  - Centered floating download button with hover effect
+- ✅ **Error Handling**:
+  - URL length validation (max 500 chars)
+  - User-friendly error messages
+  - Suggestion to use URL shortener for long URLs
+
 ### v1.0.5 (2024-12-30)
 - ✅ **New Feature**: Custom QR code colors
   - Customize foreground and background colors

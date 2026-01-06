@@ -46,5 +46,69 @@
   "loadingText": {
     "message": "正在生成二维码...",
     "description": "生成二维码时显示的文本"
+  },
+  "customizeColor": {
+    "message": "自定义样式",
+    "description": "自定义颜色按钮文本"
+  },
+  "foregroundColor": {
+    "message": "前景色",
+    "description": "前景色输入框标签"
+  },
+  "backgroundColor": {
+    "message": "背景色",
+    "description": "背景色输入框标签"
+  },
+  "presetColors": {
+    "message": "预设主题",
+    "description": "预设颜色标签"
+  },
+  "classicBlackWhite": {
+    "message": "经典黑白",
+    "description": "经典黑白预设提示"
+  },
+  "blueTheme": {
+    "message": "商务蓝",
+    "description": "蓝色主题预设提示"
+  },
+  "greenTheme": {
+    "message": "清新绿",
+    "description": "绿色主题预设提示"
+  },
+  "redTheme": {
+    "message": "活力红",
+    "description": "红色主题预设提示"
+  },
+  "purpleTheme": {
+    "message": "优雅紫",
+    "description": "紫色主题预设提示"
+  },
+  "resetColor": {
+    "message": "重置",
+    "description": "重置颜色按钮文本"
+  },
+  "paddingControl": {
+    "message": "留白与边距",
+    "description": "留白控制标签"
+  },
+  "settingsHeader": {
+    "message": "设置",
+    "description": "设置面板标题"
+  },
+  "paddingNone": {
+    "message": "无",
+    "description": "无留白提示"
+  },
+  "paddingSmall": {
+    "message": "小",
+    "description": "小留白提示"
+  },
+  "paddingMedium": {
+    "message": "中",
+    "description": "中留白提示"
+  },
+  "paddingLarge": {
+    "message": "大",
+    "description": "大留白提示"
   }
 }

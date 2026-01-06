@@ -13,7 +13,11 @@
   },
   "copyButtonText": {
     "message": "Copy",
-    "description": "Copy button text"
+    "description": "Padding control text"
+  },
+  "settingsHeader": {
+    "message": "Settings",
+    "description": "Title for the settings panel"
   },
   "copiedText": {
     "message": "Copied",
@@ -46,5 +50,65 @@
   "loadingText": {
     "message": "Generating QR Code...",
     "description": "Text shown while generating QR code"
+  },
+  "customizeColor": {
+    "message": "Customize",
+    "description": "Button to toggle color customization"
+  },
+  "foregroundColor": {
+    "message": "Foreground",
+    "description": "Label for foreground color input"
+  },
+  "backgroundColor": {
+    "message": "Background",
+    "description": "Label for background color input"
+  },
+  "presetColors": {
+    "message": "Presets",
+    "description": "Label for preset colors"
+  },
+  "classicBlackWhite": {
+    "message": "Classic",
+    "description": "Tooltip for classic black/white preset"
+  },
+  "blueTheme": {
+    "message": "Blue",
+    "description": "Tooltip for blue preset"
+  },
+  "greenTheme": {
+    "message": "Green",
+    "description": "Tooltip for green preset"
+  },
+  "redTheme": {
+    "message": "Red",
+    "description": "Tooltip for red preset"
+  },
+  "purpleTheme": {
+    "message": "Purple",
+    "description": "Tooltip for purple preset"
+  },
+  "resetColor": {
+    "message": "Reset",
+    "description": "Button to reset colors"
+  },
+  "paddingControl": {
+    "message": "Padding",
+    "description": "Label for padding control"
+  },
+  "paddingNone": {
+    "message": "None",
+    "description": "Tooltip for 0 padding"
+  },
+  "paddingSmall": {
+    "message": "Small",
+    "description": "Tooltip for small padding"
+  },
+  "paddingMedium": {
+    "message": "Med",
+    "description": "Tooltip for medium padding"
+  },
+  "paddingLarge": {
+    "message": "Large",
+    "description": "Tooltip for large padding"
   }
 }

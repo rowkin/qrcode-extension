@@ -110,5 +110,81 @@
   "paddingLarge": {
     "message": "Large",
     "description": "Tooltip for large padding"
+  },
+  "qrGeneratorTitle": {
+    "message": "QR Code Generator",
+    "description": "Left panel title"
+  },
+  "contextMenuParent": {
+    "message": "QR Code (Generate & Recognize)",
+    "description": "Context menu parent title"
+  },
+  "contextMenuGenerate": {
+    "message": "Generate QR Code",
+    "description": "Context menu generate item"
+  },
+  "contextMenuRecognize": {
+    "message": "Recognize QR Code",
+    "description": "Context menu recognize item"
+  },
+  "recognitionTitle": {
+    "message": "QR Code Recognition Result",
+    "description": "Recognition panel title"
+  },
+  "recognitionSuccess": {
+    "message": "Recognition successful",
+    "description": "Recognition success message"
+  },
+  "recognitionFailed": {
+    "message": "No QR code detected",
+    "description": "Recognition failure message"
+  },
+  "recognizedContent": {
+    "message": "Recognized Content",
+    "description": "Recognized content label"
+  },
+  "visitUrl": {
+    "message": "Visit URL",
+    "description": "Visit URL button"
+  },
+  "generateFromRecognized": {
+    "message": "Generate QR Code",
+    "description": "Generate QR from recognized content button"
+  },
+  "recognizing": {
+    "message": "Recognizing QR code...",
+    "description": "Recognizing message"
+  },
+  "customizeQRCode": {
+    "message": "Customize QR Code",
+    "description": "Customize QR from recognized content button"
+  },
+  "urlLengthHint": {
+    "message": "URL is long. Consider using a URL shortener for better scanning.",
+    "description": "URL length hint message"
+  },
+  "phoneNumber": {
+    "message": "Phone",
+    "description": "Phone number type label"
+  },
+  "emailAddress": {
+    "message": "Email",
+    "description": "Email address type label"
+  },
+  "plainText": {
+    "message": "Text",
+    "description": "Plain text type label"
+  },
+  "makeCall": {
+    "message": "Make Call",
+    "description": "Make call button"
+  },
+  "sendEmail": {
+    "message": "Send Email",
+    "description": "Send email button"
+  },
+  "darkGrayTheme": {
+    "message": "Dark Gray",
+    "description": "Dark gray preset theme"
   }
 }

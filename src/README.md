@@ -106,6 +106,27 @@ A simple and user-friendly Chrome extension for quickly generating QR codes from
 
 ## Changelog
 
+### v1.0.8 (2026-01-07)
+- ✅ **New Feature**: Right-click QR code recognition
+  - Right-click on images and select "Recognize QR Code"
+  - Client-side QR code decoding using jsQR library
+  - Copy content, visit URL, or regenerate QR code after recognition
+  - Supports various QR code encoding formats
+- ✅ **Context Menu Optimization**:
+  - Restructured menu as "QR Code (Generate & Recognize)" parent menu
+  - "Generate QR Code" submenu (page/text/link)
+  - "Recognize QR Code" submenu (image)
+- ✅ **Version Sync Optimization**:
+  - Panel version number automatically reads from manifest.json
+  - Fixed version inconsistency after build
+- ✅ **Rendering Experience Optimization**:
+  - Fixed panel positioning offset during initialization
+  - Optimized animation timing to ensure centered display without jumping
+  - Uses requestAnimationFrame for precise display timing control
+
+### v1.0.7 (2026-01-06)
+- ✅ **New Feature**: QR code preview and download
+
 ### v1.0.6 (2026-01-06)
 - ✅ **UI Redesign**: Split-panel layout optimization
   - Left panel: QR code display with title and version
@@ -137,12 +158,38 @@ A simple and user-friendly Chrome extension for quickly generating QR codes from
 
 ## Future Plans
 
+### Completed Features
 - [x] Custom QR code colors (v1.0.5)
-- [ ] Adjustable QR code size
-- [ ] QR code preview feature
-- [ ] Additional language support
-- [ ] QR code style templates
+- [x] Adjustable QR code size (v1.0.6)
+- [x] QR code preview feature (v1.0.7)
+- [x] Right-click QR code recognition (v1.0.8)
+
+### Planned Features
+
+**Basic Feature Enhancements**
+- [ ] Additional language support (Korean, French, German, etc.)
 - [ ] History feature
+- [ ] Batch QR code generation
+- [ ] SVG export format
+
+**Advanced QR Code Features**
+- [ ] QR code styling templates (rounded corners, gradients, patterns)
+- [ ] Custom logo embedding (center icon)
+- [ ] Adjustable error correction levels (L/M/Q/H)
+- [ ] QR code expiration time setting
+
+**Special QR Code Types**
+- [ ] WiFi connection QR codes
+- [ ] vCard QR codes
+- [ ] Geo-location QR codes
+- [ ] Phone/SMS QR codes
+- [ ] Email QR codes
+
+**Recognition Feature Enhancements**
+- [ ] Batch recognize all QR codes on page
+- [ ] Upload local file for recognition
+- [ ] Screenshot QR code recognition
+- [ ] Recognition history
 
 ## Contributing
 

@@ -110,5 +110,81 @@
   "paddingLarge": {
     "message": "大",
     "description": "大留白提示"
+  },
+  "qrGeneratorTitle": {
+    "message": "二维码生成器",
+    "description": "面板左侧标题"
+  },
+  "contextMenuParent": {
+    "message": "二维码（生成及识别）",
+    "description": "右键菜单父级标题"
+  },
+  "contextMenuGenerate": {
+    "message": "生成二维码",
+    "description": "右键菜单生成项"
+  },
+  "contextMenuRecognize": {
+    "message": "识别二维码",
+    "description": "右键菜单识别项"
+  },
+  "recognitionTitle": {
+    "message": "二维码识别结果",
+    "description": "识别面板标题"
+  },
+  "recognitionSuccess": {
+    "message": "识别成功",
+    "description": "识别成功提示"
+  },
+  "recognitionFailed": {
+    "message": "未检测到二维码",
+    "description": "识别失败提示"
+  },
+  "recognizedContent": {
+    "message": "识别内容",
+    "description": "识别内容标签"
+  },
+  "visitUrl": {
+    "message": "访问链接",
+    "description": "访问URL按钮"
+  },
+  "generateFromRecognized": {
+    "message": "生成二维码",
+    "description": "从识别内容生成二维码按钮"
+  },
+  "recognizing": {
+    "message": "正在识别二维码...",
+    "description": "识别中提示"
+  },
+  "customizeQRCode": {
+    "message": "自定义二维码",
+    "description": "从识别内容自定义生成二维码按钮"
+  },
+  "urlLengthHint": {
+    "message": "URL较长，建议使用短链接服务以提高扫描成功率",
+    "description": "URL长度提示消息"
+  },
+  "phoneNumber": {
+    "message": "电话",
+    "description": "电话号码类型标签"
+  },
+  "emailAddress": {
+    "message": "邮箱",
+    "description": "邮箱地址类型标签"
+  },
+  "plainText": {
+    "message": "文本",
+    "description": "纯文本类型标签"
+  },
+  "makeCall": {
+    "message": "拨打电话",
+    "description": "拨打电话按钮"
+  },
+  "sendEmail": {
+    "message": "发送邮件",
+    "description": "发送邮件按钮"
+  },
+  "darkGrayTheme": {
+    "message": "深灰主题",
+    "description": "深灰色预设主题"
   }
 }

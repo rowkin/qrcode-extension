@@ -1,6 +1,6 @@
 // 防止重复注入监听器
-if (!window.qrcodeExtensionInjected_v106) {
-  window.qrcodeExtensionInjected_v106 = true;
+if (!window.qrcodeExtensionInjected_v108) {
+  window.qrcodeExtensionInjected_v108 = true;
 
   // 监听来自 background 的消息
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -8,13 +8,28 @@ if (!window.qrcodeExtensionInjected_v106) {
       try {
         injectQRCodePanel(request.url);
         sendResponse({ success: true });
-    } catch (error) {
+      } catch (error) {
         console.error('Failed to inject QR code panel:', error);
         sendResponse({ success: false, error: error.message });
       }
       return true; // 表明我们会异步发送响应
+    } else if (request.action === 'recognizeQRCode') {
+      try {
+        recognizeQRCodeFromImage(request.imageUrl);
+        sendResponse({ success: true });
+      } catch (error) {
+        console.error('Failed to recognize QR code:', error);
+        sendResponse({ success: false, error: error.message });
+      }
+      return true;
     }
   });
+}
+
+// 获取扩展版本号
+function getExtensionVersion() {
+  const manifest = chrome.runtime.getManifest();
+  return 'v' + manifest.version;
 }
 
 // 移除现有面板
@@ -45,7 +60,7 @@ function injectStyles() {
         max-width: 90vw;
         height: 520px;
         max-height: 90vh;
-        animation: fadeIn 0.3s ease;
+        opacity: 0;
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -441,6 +456,15 @@ function injectStyles() {
         background: #bdc1c6;
       }
       
+      /* Panel fade in animation */
+      @keyframes panelFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      #qrcode-floating-panel.show {
+        animation: panelFadeIn 0.3s ease forwards;
+      }
+      
       .tooltip {
         position: absolute;
         top: -30px;
@@ -604,6 +628,20 @@ function injectStyles() {
       color: #5f6368;
       font-size: 12px;
       line-height: 1.5;
+    }
+    
+    /* URL长度提示样式 */
+    .qr-hint {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: #fef7e0;
+      border: 1px solid #f9ab00;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #5f6368;
+      display: flex;
+      align-items: center;
+      line-height: 1.4;
     }
 
   `;
@@ -815,6 +853,32 @@ function savePaddingSettings(padding) {
 }
 
 // 生成带留白的二维码
+// 确保 QRCode 库已加载
+async function ensureQRCodeLibLoaded() {
+  // 如果 QRCode 已经存在，直接返回
+  if (typeof QRCode !== 'undefined') {
+    console.log('[QR Extension] QRCode library already loaded');
+    return true;
+  }
+  
+  console.log('[QR Extension] QRCode library not found, loading...');
+  
+  // 动态加载 qrcode.min.js
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = chrome.runtime.getURL('qrcode.min.js');
+    script.onload = () => {
+      console.log('[QR Extension] QRCode library loaded successfully');
+      resolve(true);
+    };
+    script.onerror = (error) => {
+      console.error('[QR Extension] Failed to load QRCode library:', error);
+      reject(new Error('Failed to load QRCode library'));
+    };
+    document.head.appendChild(script);
+  });
+}
+
 async function generateQRCodeWithPadding(canvas, url, colorDark, colorLight, padding) {
   return new Promise((resolve, reject) => {
     // 创建临时容器生成二维码
@@ -941,10 +1005,8 @@ async function generateQRCode(panel, url, colorDark = null, colorLight = null, p
 
   setTimeout(async () => {
     try {
-      // 检查URL长度
-      if (url && url.length > 500) {
-        throw new Error('URL太长，请使用较短的链接');
-      }
+      // 确保 QRCode 库已加载
+      await ensureQRCodeLibLoaded();
       
       // 创建 canvas 用于显示带留白的二维码
       const canvas = document.createElement('canvas');
@@ -964,6 +1026,19 @@ async function generateQRCode(panel, url, colorDark = null, colorLight = null, p
       
       // 添加 canvas 到容器
       container.appendChild(canvas);
+      
+      // 添加URL长度提示（如果URL较长）
+      if (url && url.length > 300) {
+        const hintElement = document.createElement('div');
+        hintElement.className = 'qr-hint';
+        hintElement.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" style="margin-right: 4px; vertical-align: middle;">
+            <path fill="#f9ab00" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V6h2v6z"/>
+          </svg>
+          <span>${chrome.i18n.getMessage("urlLengthHint") || "URL较长，建议使用短链接服务以提高扫描成功率"}</span>
+        `;
+        container.parentNode.insertBefore(hintElement, container.nextSibling);
+      }
       
       // 保存 canvas 引用到容器，供下载使用
       container.dataset.qrCanvas = 'true';
@@ -991,7 +1066,7 @@ async function generateQRCode(panel, url, colorDark = null, colorLight = null, p
             </svg>
           </div>
           <div class="error-message">${errorMsg}</div>
-          <div class="error-hint">建议：使用短链接服务缩短URL</div>
+          <div class="error-hint">建议：使用短链接服务缩短URL（如 bit.ly, tinyurl.com）</div>
         </div>
       `;
     }
@@ -999,6 +1074,24 @@ async function generateQRCode(panel, url, colorDark = null, colorLight = null, p
 }
 
 function injectQRCodePanel(url) {
+  // 严格的类型检查：确保 url 是字符串
+  if (!url) {
+    console.error('[QR Extension] injectQRCodePanel called with empty URL');
+    return;
+  }
+  
+  // 如果传入的是对象，尝试提取字符串值
+  if (typeof url === 'object') {
+    console.warn('[QR Extension] URL parameter is an object, attempting to extract string value:', url);
+    // 尝试常见的属性名
+    url = url.data || url.url || url.text || url.value || String(url);
+  }
+  
+  // 确保是字符串并去除首尾空格
+  url = String(url).trim();
+  
+  console.log('[QR Extension] injectQRCodePanel URL:', url);
+  
   // 如果已存在面板，先移除
   removeExistingPanel();
 
@@ -1032,7 +1125,7 @@ function injectQRCodePanel(url) {
         </div>
         
         <div class="left-column-footer">
-          <p class="version-info">v1.0.6</p>
+          <p class="version-info">${getExtensionVersion()}</p>
         </div>
       </div>
       
@@ -1068,17 +1161,20 @@ function injectQRCodePanel(url) {
                 <button class="preset-btn" data-dark="#000000" data-light="#ffffff" title="${chrome.i18n.getMessage("classicBlackWhite")}">
                   <span class="preset-color-box" style="background: linear-gradient(135deg, #000000 0%, #000000 50%, #ffffff 50%, #ffffff 100%);"></span>
                 </button>
-                <button class="preset-btn" data-dark="#1a73e8" data-light="#ffffff" title="${chrome.i18n.getMessage("blueTheme")}">
-                  <span class="preset-color-box" style="background: linear-gradient(135deg, #1a73e8 0%, #1a73e8 50%, #ffffff 50%, #ffffff 100%);"></span>
+                <button class="preset-btn" data-dark="#0052d9" data-light="#ffffff" title="${chrome.i18n.getMessage("blueTheme")}">
+                  <span class="preset-color-box" style="background: linear-gradient(135deg, #0052d9 0%, #0052d9 50%, #ffffff 50%, #ffffff 100%);"></span>
                 </button>
-                <button class="preset-btn" data-dark="#34a853" data-light="#ffffff" title="${chrome.i18n.getMessage("greenTheme")}">
-                  <span class="preset-color-box" style="background: linear-gradient(135deg, #34a853 0%, #34a853 50%, #ffffff 50%, #ffffff 100%);"></span>
+                <button class="preset-btn" data-dark="#00a870" data-light="#ffffff" title="${chrome.i18n.getMessage("greenTheme")}">
+                  <span class="preset-color-box" style="background: linear-gradient(135deg, #00a870 0%, #00a870 50%, #ffffff 50%, #ffffff 100%);"></span>
                 </button>
-                <button class="preset-btn" data-dark="#ea4335" data-light="#ffffff" title="${chrome.i18n.getMessage("redTheme")}">
-                  <span class="preset-color-box" style="background: linear-gradient(135deg, #ea4335 0%, #ea4335 50%, #ffffff 50%, #ffffff 100%);"></span>
+                <button class="preset-btn" data-dark="#d54941" data-light="#ffffff" title="${chrome.i18n.getMessage("redTheme")}">
+                  <span class="preset-color-box" style="background: linear-gradient(135deg, #d54941 0%, #d54941 50%, #ffffff 50%, #ffffff 100%);"></span>
                 </button>
-                <button class="preset-btn" data-dark="#9334e6" data-light="#ffffff" title="${chrome.i18n.getMessage("purpleTheme")}">
-                  <span class="preset-color-box" style="background: linear-gradient(135deg, #9334e6 0%, #9334e6 50%, #ffffff 50%, #ffffff 100%);"></span>
+                <button class="preset-btn" data-dark="#8a2be2" data-light="#ffffff" title="${chrome.i18n.getMessage("purpleTheme")}">
+                  <span class="preset-color-box" style="background: linear-gradient(135deg, #8a2be2 0%, #8a2be2 50%, #ffffff 50%, #ffffff 100%);"></span>
+                </button>
+                <button class="preset-btn" data-dark="#2c3e50" data-light="#ffffff" title="${chrome.i18n.getMessage("darkGrayTheme") || "深灰主题"}">
+                  <span class="preset-color-box" style="background: linear-gradient(135deg, #2c3e50 0%, #2c3e50 50%, #ffffff 50%, #ffffff 100%);"></span>
                 </button>
               </div>
             </div>
@@ -1110,6 +1206,14 @@ function injectQRCodePanel(url) {
   
   document.body.appendChild(overlay);
   document.body.appendChild(panel);
+  
+  // 确保面板在首次渲染时已经居中，避免位置跳动
+  // 使用 requestAnimationFrame 确保 DOM 已完成布局计算
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      panel.classList.add('show');
+    });
+  });
   
   // 设置关闭事件
   setupCloseHandlers(panel, overlay);
@@ -1335,5 +1439,268 @@ async function setupColorCustomizer(panel, url) {
       debounceGenerate(colorDarkInput.value, colorLightInput.value, padding);
     });
   });
+}
+
+// 识别图片中的二维码
+async function recognizeQRCodeFromImage(imageUrl) {
+  try {
+    // 创建一个图片元素来加载图片
+    const img = new Image();
+    img.crossOrigin = 'Anonymous'; // 尝试跨域加载
+    
+    // 加载图片
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = imageUrl;
+    });
+    
+    // 创建 canvas 来绘制图片
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    
+    // 获取图片数据
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+    // 使用 jsQR 识别二维码
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    
+    if (code && code.data) {
+      // 确保 code.data 是字符串类型
+      const recognizedText = String(code.data).trim();
+      // 识别成功，显示识别结果面板
+      showRecognitionPanel(recognizedText);
+    } else {
+      // 识别失败
+      showRecognitionPanel(null);
+    }
+    
+  } catch (error) {
+    console.error('QR code recognition error:', error);
+    showRecognitionPanel(null, error.message);
+  }
+}
+
+// 显示识别结果面板
+function showRecognitionPanel(recognizedData, errorMessage = null) {
+  // 移除现有面板
+  removeExistingPanel();
+  
+  // 创建浮动面板
+  const panel = document.createElement('div');
+  panel.id = 'qrcode-floating-panel';
+  
+  // 注入样式
+  injectStyles();
+  
+  // 创建遮罩层
+  const overlay = document.createElement('div');
+  overlay.className = 'qrcode-overlay';
+  
+  
+  const isSuccess = recognizedData !== null;
+  
+  // 智能检测内容类型
+  let contentType = 'text'; // 默认纯文本
+  let actionButton = null;
+  
+  if (recognizedData) {
+    // URL检测（更宽容的判断）
+    if (recognizedData.match(/^(https?|ftp):\/\//i) || 
+        recognizedData.match(/^www\./i) ||
+        recognizedData.match(/^[a-z0-9-]+\.[a-z]{2,}/i)) {
+      contentType = 'url';
+      actionButton = {
+        id: 'visit-url-btn',
+        text: chrome.i18n.getMessage("visitUrl") || "访问链接",
+        style: 'background: #1a73e8; color: white; border-color: #1a73e8;',
+        action: 'openUrl'
+      };
+    }
+    // 电话号码检测
+    else if (recognizedData.match(/^tel:/i) || 
+             recognizedData.match(/^\+?[\d\s\-()]{8,}$/)) {
+      contentType = 'phone';
+      actionButton = {
+        id: 'call-btn',
+        text: chrome.i18n.getMessage("makeCall") || "拨打电话",
+        style: 'background: #34a853; color: white; border-color: #34a853;',
+        action: 'call'
+      };
+    }
+    // 邮箱检测
+    else if (recognizedData.match(/^mailto:/i) || 
+             recognizedData.match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i)) {
+      contentType = 'email';
+      actionButton = {
+        id: 'send-email-btn',
+        text: chrome.i18n.getMessage("sendEmail") || "发送邮件",
+        style: 'background: #ea4335; color: white; border-color: #ea4335;',
+        action: 'email'
+      };
+    }
+    // WiFi 配置检测
+    else if (recognizedData.match(/^WIFI:/i)) {
+      contentType = 'wifi';
+      // WiFi 配置无法直接操作，只显示文本
+    }
+  }
+  
+  // 构建面板内容
+  panel.innerHTML = `
+    <button class="close-btn">&times;</button>
+    <div class="panel-content">
+      <div class="left-column" style="width: 100%;">
+        <div class="left-column-header">
+          <h2 class="qr-title">${chrome.i18n.getMessage("recognitionTitle") || "二维码识别结果"}</h2>
+        </div>
+        
+        <div class="left-column-content" style="padding: 32px 24px;">
+          ${isSuccess ? `
+            <div style="width: 100%; max-width: 500px;">
+              <div style="margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 12px;">
+                <svg viewBox="0 0 24 24" width="48" height="48" style="color: #34a853; flex-shrink: 0;">
+                  <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                <p style="color: #34a853; font-size: 16px; font-weight: 500; margin: 0;">
+                  ${chrome.i18n.getMessage("recognitionSuccess") || "识别成功"}
+                </p>
+              </div>
+              
+              <div style="background: #f8f9fa; border: 1px solid #dadce0; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                <label style="display: block; font-size: 13px; color: #5f6368; margin-bottom: 8px;">
+                  ${chrome.i18n.getMessage("recognizedContent") || "识别内容"}:
+                  <span style="margin-left: 8px; padding: 2px 8px; background: #e8f0fe; color: #1967d2; border-radius: 4px; font-size: 11px;">
+                    ${contentType === 'url' ? 'URL' : 
+                      contentType === 'phone' ? chrome.i18n.getMessage("phoneNumber") || '电话' : 
+                      contentType === 'email' ? chrome.i18n.getMessage("emailAddress") || '邮箱' : 
+                      contentType === 'wifi' ? 'WiFi' : 
+                      chrome.i18n.getMessage("plainText") || '文本'}
+                  </span>
+                </label>
+                <div style="font-size: 14px; line-height: 1.6; color: #202124; word-break: break-all; max-height: 200px; overflow-y: auto;">
+                  ${recognizedData}
+                </div>
+              </div>
+              
+              <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <button id="copy-recognized-btn" class="copy-btn" style="flex: 1; max-width: 150px;">
+                  ${chrome.i18n.getMessage("copyButtonText") || "复制"}
+                </button>
+                ${actionButton ? `
+                  <button id="${actionButton.id}" class="copy-btn" style="flex: 1; max-width: 150px; ${actionButton.style}">
+                    ${actionButton.text}
+                  </button>
+                ` : ''}
+                <button id="generate-from-recognized-btn" class="copy-btn" style="flex: 1; max-width: 150px;">
+                  ${chrome.i18n.getMessage("customizeQRCode") || "自定义二维码"}
+                </button>
+              </div>
+            </div>
+          ` : `
+            <div style="text-align: center; width: 100%; max-width: 400px;">
+              <svg viewBox="0 0 24 24" width="64" height="64" style="color: #d93025; margin-bottom: 16px;">
+                <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+              </svg>
+              <p style="color: #d93025; font-size: 16px; font-weight: 500; margin-bottom: 8px;">
+                ${chrome.i18n.getMessage("recognitionFailed") || "未检测到二维码"}
+              </p>
+              ${errorMessage ? `
+                <p style="color: #5f6368; font-size: 13px;">
+                  ${errorMessage}
+                </p>
+              ` : ''}
+            </div>
+          `}
+        </div>
+        
+        <div class="left-column-footer">
+          <p class="version-info">${getExtensionVersion()}</p>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(overlay);
+  document.body.appendChild(panel);
+  
+  // 触发显示动画
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      panel.classList.add('show');
+    });
+  });
+  
+  // 设置关闭事件
+  setupCloseHandlers(panel, overlay);
+  
+  if (isSuccess) {
+    // 设置复制按钮
+    const copyBtn = panel.querySelector('#copy-recognized-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(recognizedData);
+          copyBtn.textContent = chrome.i18n.getMessage("copiedText") || "已复制";
+          copyBtn.classList.add('copied');
+          setTimeout(() => {
+            copyBtn.textContent = chrome.i18n.getMessage("copyButtonText") || "复制";
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        } catch (err) {
+          console.error('Copy failed:', err);
+        }
+      });
+    }
+    
+    // 设置操作按钮（URL/电话/邮箱）
+    if (actionButton) {
+      const actionBtn = panel.querySelector(`#${actionButton.id}`);
+      if (actionBtn) {
+        actionBtn.addEventListener('click', () => {
+          if (actionButton.action === 'openUrl') {
+            // 处理URL，确保有协议前缀
+            let url = recognizedData;
+            if (!url.match(/^https?:\/\//i)) {
+              url = 'http://' + url;
+            }
+            window.open(url, '_blank');
+          } else if (actionButton.action === 'call') {
+            // 拨打电话
+            let tel = recognizedData;
+            if (!tel.startsWith('tel:')) {
+              tel = 'tel:' + tel.replace(/[\s\-()]/g, '');
+            }
+            window.location.href = tel;
+          } else if (actionButton.action === 'email') {
+            // 发送邮件
+            let mailto = recognizedData;
+            if (!mailto.startsWith('mailto:')) {
+              mailto = 'mailto:' + mailto;
+            }
+            window.location.href = mailto;
+          }
+        });
+      }
+    }
+    
+    // 设置自定义二维码按钮
+    const generateBtn = panel.querySelector('#generate-from-recognized-btn');
+    if (generateBtn) {
+      generateBtn.addEventListener('click', () => {
+        // 关闭当前面板
+        panel.remove();
+        overlay.remove();
+        // 确保传递的是纯字符串而非对象
+        const urlToGenerate = typeof recognizedData === 'string' ? recognizedData : String(recognizedData);
+        console.log('[QR Extension] Generating QR from recognized data:', urlToGenerate);
+        // 打开完整的生成器面板（带设置）
+        injectQRCodePanel(urlToGenerate);
+      });
+    }
+  }
 }
 

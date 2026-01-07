@@ -6,10 +6,27 @@ chrome.runtime.onInstalled.addListener(() => {
 // 统一的创建菜单函数
 function createContextMenu() {
   chrome.contextMenus.removeAll(() => {
+    // 创建父级菜单
+    chrome.contextMenus.create({
+      id: "qrcodeParent",
+      title: chrome.i18n.getMessage("contextMenuParent"),
+      contexts: ["page", "selection", "link", "image"]
+    });
+    
+    // 创建"生成二维码"子菜单
     chrome.contextMenus.create({
       id: "generateQRCode",
-      title: chrome.i18n.getMessage("contextMenuTitle"),
+      parentId: "qrcodeParent",
+      title: chrome.i18n.getMessage("contextMenuGenerate"),
       contexts: ["page", "selection", "link"]
+    });
+    
+    // 创建"识别二维码"子菜单（仅在图片上显示）
+    chrome.contextMenus.create({
+      id: "recognizeQRCode",
+      parentId: "qrcodeParent",
+      title: chrome.i18n.getMessage("contextMenuRecognize"),
+      contexts: ["image"]
     }, () => {
       if (chrome.runtime.lastError) {
         console.error('创建菜单出错:', chrome.runtime.lastError);
@@ -31,6 +48,11 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     }
     
     showQRCode(tab.id, url);
+  } else if (info.menuItemId === "recognizeQRCode") {
+    // 处理识别二维码
+    if (info.srcUrl) {
+      recognizeQRCodeFromImage(tab.id, info.srcUrl);
+    }
   }
 });
 
@@ -87,3 +109,37 @@ async function showQRCode(tabId, url) {
 chrome.runtime.onStartup.addListener(() => {
   createContextMenu();
 });
+
+// 识别图片中的二维码
+async function recognizeQRCodeFromImage(tabId, imageUrl) {
+  try {
+    // 检查页面中是否已经注入了 jsQR 库
+    const [{ result: hasJsQR }] = await chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      func: () => typeof jsQR !== 'undefined'
+    });
+
+    if (!hasJsQR) {
+      await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['jsQR.min.js']
+      });
+    }
+
+    // 注入内容脚本
+    await chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      files: ['content-script.js']
+    });
+
+    // 发送消息给内容脚本进行识别
+    await chrome.tabs.sendMessage(tabId, {
+      action: 'recognizeQRCode',
+      imageUrl: imageUrl
+    });
+
+  } catch (error) {
+    console.error('Failed to recognize QR code:', error);
+    throw error;
+  }
+}

@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# 确保脚本在错误时退出
+# 设置错误处理
 set -e
 
-# 获取项目根目录的绝对路径
+# 获取项目根目录
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# canonical source directory (can be overridden by environment)
-SRC_DIR="${SRC_DIR:-src}"
-SRC_PATH="$ROOT_DIR/$SRC_DIR"
+SRC_PATH="${SRC_DIR:+$ROOT_DIR/$SRC_DIR}"
+SRC_PATH="${SRC_PATH:-$ROOT_DIR}"
 
 # 解析命令行参数
 PACK_ONLY=false
@@ -15,76 +14,22 @@ for arg in "$@"; do
     case $arg in
         --pack-only)
             PACK_ONLY=true
-            shift # 移除参数
+            shift
             ;;
     esac
 done
 
-# 添加调试输出
-debug_config() {
-    echo "Debug: Reading config file..."
-    cat "$ROOT_DIR/.extensionrc"
-}
+echo "=== Build Configuration ==="
+echo "ROOT_DIR: $ROOT_DIR"
+echo "SRC_PATH: $SRC_PATH"
+echo "PACK_ONLY: $PACK_ONLY"
+echo ""
 
 # 函数：检查文件是否存在
 check_file() {
     if [ ! -f "$1" ]; then
-        echo "Error: $1 not found"
-        echo "Current directory: $(pwd)"
-        echo "Root directory: $ROOT_DIR"
+        echo "Error: Required file $1 not found"
         exit 1
-    fi
-}
-
-# 函数：加载配置文件
-load_config() {
-    local config_file="$ROOT_DIR/.extensionrc"
-    if [ -f "$config_file" ]; then
-        echo "Loading configuration from .extensionrc..."
-        node -e "
-            try {
-                const fs = require('fs');
-                const config = JSON.parse(fs.readFileSync('$config_file', 'utf8'));
-                console.log(JSON.stringify(config));
-            } catch (error) {
-                console.error('Error reading config:', error);
-                process.exit(1);
-            }
-        "
-    else
-        # 返回默认配置
-        echo '{
-            "name": "qrcode-extension",
-            "files": {
-                "required": [
-                    "manifest.json",
-                    "popup.html",
-                    "popup.js",
-                    "qrcode.min.js"
-                ],
-                "optional": [
-                    "background.js",
-                    "content-script.js"
-                ],
-                "directories": [
-                    "icons",
-                    "_locales",
-                    "lib",
-                    "styles"
-                ],
-                "documentation": [
-                    "README.md",
-                    "README-zh.md",
-                    "LICENSE"
-                ]
-            },
-            "output": {
-                "directory": "dist",
-                "format": "zip",
-                "sourceMap": false,
-                "clean": true
-            }
-        }'
     fi
 }
 
@@ -105,8 +50,6 @@ update_manifest_version() {
     echo "Updated manifest.json version to $version"
 }
 
-# 函数：创建发布包
-# 函数：创建发布包
 # 函数：创建发布包
 create_release_package() {
     local version="$1"
@@ -152,7 +95,7 @@ JSON
     echo "Debug: Directories: ${directories[*]}"
     echo "Debug: Documentation: ${docs[*]}"
 
-    # 复制必需文件和可选文件，从 SRC_PATH 而非 ROOT_DIR
+    # 复制必需文件和可选文件
     for file in "${required_files[@]}"; do
         if [ -f "$SRC_PATH/$file" ]; then
             echo "Copying required file: $file"
@@ -205,9 +148,9 @@ JSON
         unzip -l "$zip_file"
         local size=$(du -h "$zip_file" | cut -f1)
         echo "Package size: $size"
-        if command -v md5sum >/dev/null 2>&1; then
+        if command -v md5sum > /dev/null 2>&1; then
             echo "MD5: $(md5sum "$zip_file" | cut -d' ' -f1)"
-        elif command -v md5 >/dev/null 2>&1; then
+        elif command -v md5 > /dev/null 2>&1; then
             echo "MD5: $(md5 -q "$zip_file")"
         fi
     else
@@ -218,7 +161,7 @@ JSON
 
 # 函数：检查命令是否存在
 check_command() {
-    if ! command -v "$1" >/dev/null 2>&1; then
+    if ! command -v "$1" > /dev/null 2>&1; then
         echo "Error: $1 is required but not installed. Please install $1 first."
         exit 1
     fi
@@ -234,7 +177,7 @@ main() {
     check_command node
     check_command zip
     
-    # 检查必需文件（优先来自 SRC_PATH，否则回退到 ROOT_DIR）
+    # 检查必需文件
     if [ -f "$SRC_PATH/package.json" ]; then
         check_file "$SRC_PATH/package.json"
     else
@@ -257,6 +200,7 @@ main() {
     fi
     
     local version
+    local version_bumped=false
     
     if [ "$PACK_ONLY" = true ]; then
         # 只打包模式：使用当前版本号
@@ -270,14 +214,24 @@ main() {
             exit 1
         fi
         
-        # 自增版本号
         cd "$ROOT_DIR" || exit 1
-        echo "Incrementing version number..."
-        npm version patch
         
-        # 获取新版本号
+        # 获取当前package.json中的版本号
         version="$(node -p "require('./package.json').version")"
-        echo "New version: $version"
+        echo "Current version in package.json: $version"
+        
+        # 检查该版本是否已经有对应的tag
+        if git rev-parse "v$version" > /dev/null 2>&1; then
+            echo "Tag v$version already exists, incrementing version..."
+            # Tag已存在，说明当前版本已发布，需要自增
+            npm version patch
+            version="$(node -p "require('./package.json').version")"
+            version_bumped=true
+            echo "Version bumped to: $version"
+        else
+            echo "Tag v$version does not exist, using current version from package.json"
+            echo "This allows you to manually update package.json version without auto-increment"
+        fi
         
         # 更新manifest.json中的版本号
         update_manifest_version "$version"
@@ -290,16 +244,33 @@ main() {
         # Git 操作（仅在完整构建模式下执行）
         echo "Performing Git operations..."
         
-        # 添加manifest.json的更改
-        git add "$ROOT_DIR/manifest.json"
+        # 添加更改的文件
+        if [ "$version_bumped" = true ]; then
+            # 如果版本号被自增，package.json已经被npm version更新并提交
+            # 只需添加manifest.json
+            git add "$SRC_PATH/manifest.json"
+        else
+            # 如果版本号未自增（使用package.json中已有的版本）
+            # 需要同时添加package.json和manifest.json
+            git add "$ROOT_DIR/package.json" "$SRC_PATH/manifest.json"
+        fi
         
-        # 提交更新
-        git commit -m "chore: bump version to $version"
+        # 检查是否有需要提交的更改
+        if [ -n "$(git diff --cached)" ]; then
+            git commit -m "chore: release version $version"
+        else
+            echo "No changes to commit"
+        fi
         
-        # 检查标签是否已存在
-        if git rev-parse "v$version" >/dev/null 2>&1; then
-            echo "Warning: Tag v$version already exists, removing..."
+        # 检查标签是否已存在（二次确认）
+        if git rev-parse "v$version" > /dev/null 2>&1; then
+            echo "Warning: Tag v$version already exists locally, removing..."
             git tag -d "v$version"
+        fi
+        
+        # 尝试删除远程tag（如果存在）
+        if git ls-remote --tags origin | grep -q "refs/tags/v$version"; then
+            echo "Warning: Tag v$version exists on remote, removing..."
             git push origin ":refs/tags/v$version" || true
         fi
         
@@ -314,17 +285,14 @@ main() {
         git push origin "$main_branch"
         
         echo "=== Version bump and release package creation completed successfully ==="
-        echo "Version updated to $version in both package.json and manifest.json"
+        echo "Version: $version"
+        echo "Tag v$version created and pushed to origin"
+        echo "Main branch ($main_branch) synced with origin"
     else
         echo "=== Release package creation completed successfully ==="
     fi
     
     echo "Release package created in dist/qrcode-extension-v$version.zip"
-    
-    if [ "$PACK_ONLY" = false ]; then
-        echo "Tag v$version created and pushed to origin"
-        echo "Main branch ($main_branch) synced with origin"
-    fi
     
     # 结束脚本
     echo "=== Script completed ==="

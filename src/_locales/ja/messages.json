@@ -46,5 +46,81 @@
   "loadingText": {
     "message": "QRコードを生成中...",
     "description": "QRコード生成中のテキスト"
+  },
+  "qrGeneratorTitle": {
+    "message": "QRコードジェネレーター",
+    "description": "左パネルのタイトル"
+  },
+  "contextMenuParent": {
+    "message": "QRコード（生成・認識）",
+    "description": "コンテキストメニュー親タイトル"
+  },
+  "contextMenuGenerate": {
+    "message": "QRコードを生成",
+    "description": "コンテキストメニュー生成項目"
+  },
+  "contextMenuRecognize": {
+    "message": "QRコードを認識",
+    "description": "コンテキストメニュー認識項目"
+  },
+  "recognitionTitle": {
+    "message": "QRコード認識結果",
+    "description": "認識パネルのタイトル"
+  },
+  "recognitionSuccess": {
+    "message": "認識成功",
+    "description": "認識成功メッセージ"
+  },
+  "recognitionFailed": {
+    "message": "QRコードが検出されませんでした",
+    "description": "認識失敗メッセージ"
+  },
+  "recognizedContent": {
+    "message": "認識した内容",
+    "description": "認識内容ラベル"
+  },
+  "visitUrl": {
+    "message": "URLにアクセス",
+    "description": "URLアクセスボタン"
+  },
+  "generateFromRecognized": {
+    "message": "QRコードを生成",
+    "description": "認識内容からQRコードを生成ボタン"
+  },
+  "recognizing": {
+    "message": "QRコードを認識中...",
+    "description": "認識中メッセージ"
+  },
+  "customizeQRCode": {
+    "message": "QRコードをカスタマイズ",
+    "description": "認識内容からQRコードをカスタマイズボタン"
+  },
+  "urlLengthHint": {
+    "message": "URLが長いです。スキャン成功率を向上させるため短縮 URL サービスの使用をお勧めします。",
+    "description": "URL長さヒントメッセージ"
+  },
+  "phoneNumber": {
+    "message": "電話",
+    "description": "電話番号タイプラベル"
+  },
+  "emailAddress": {
+    "message": "メール",
+    "description": "メールアドレスタイプラベル"
+  },
+  "plainText": {
+    "message": "テキスト",
+    "description": "純粋なテキストタイプラベル"
+  },
+  "makeCall": {
+    "message": "電話をかける",
+    "description": "電話をかけるボタン"
+  },
+  "sendEmail": {
+    "message": "メールを送る",
+    "description": "メールを送るボタン"
+  },
+  "darkGrayTheme": {
+    "message": "ダークグレー",
+    "description": "ダークグレーテーマ"
   }
 }

@@ -71,12 +71,12 @@ function injectStyles() {
       }
       
       .left-column-header {
-        padding: 16px 20px 12px;
+        padding: 16px 24px 12px;
         flex-shrink: 0;
       }
       
       .qr-title {
-        font-size: 15px;
+        font-size: 16px;
         font-weight: 600;
         color: #202124;
         margin: 0;
@@ -93,7 +93,7 @@ function injectStyles() {
       }
       
       .left-column-footer {
-        padding: 12px 20px 16px;
+        padding: 12px 24px 16px;
         text-align: left;
         flex-shrink: 0;
       }
@@ -116,13 +116,12 @@ function injectStyles() {
       
       .settings-header-wrapper {
         position: relative;
-        padding: 16px 56px 16px 24px;
+        padding: 16px 24px;
         border-bottom: 1px solid #e0e0e0;
         flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        min-height: 56px;
       }
       
       .settings-content {
@@ -168,8 +167,8 @@ function injectStyles() {
       #qrcode-container {
         position: relative;
         width: 100%;
-        max-width: 256px;
-        height: 256px;
+        max-width: 271px;
+        height: 271px;
         // margin: 20px auto;
         background: white;
         border: 1px solid #dadce0;
@@ -822,8 +821,8 @@ async function generateQRCodeWithPadding(canvas, url, colorDark, colorLight, pad
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'absolute';
     tempContainer.style.left = '-9999px';
-    tempContainer.style.width = '256px';
-    tempContainer.style.height = '256px';
+    tempContainer.style.width = '271px';
+    tempContainer.style.height = '271px';
     // 必须插入到文档流中，否则 canvas 可能不会正确绘制
     document.body.appendChild(tempContainer);
     
@@ -831,8 +830,8 @@ async function generateQRCodeWithPadding(canvas, url, colorDark, colorLight, pad
       // 实例化 QRCode，它是同步执行 DOM 操作的
       new QRCode(tempContainer, {
         text: url,
-        width: 256,
-        height: 256,
+        width: 271,
+        height: 271,
         colorDark: colorDark,
         colorLight: colorLight,
         correctLevel: QRCode.CorrectLevel.H
@@ -892,8 +891,8 @@ async function generateQRCodeWithPadding(canvas, url, colorDark, colorLight, pad
 function drawToMainCanvas(source, targetCanvas, padding, backgroundColor) {
   const ctx = targetCanvas.getContext('2d');
   // 计算尺寸
-  const paddingPx = Math.round((padding / 100) * 256);
-  const totalSize = 256 + paddingPx * 2;
+  const paddingPx = Math.round((padding / 100) * 271);
+  const totalSize = 271 + paddingPx * 2;
   
   targetCanvas.width = totalSize;
   targetCanvas.height = totalSize;
@@ -903,7 +902,7 @@ function drawToMainCanvas(source, targetCanvas, padding, backgroundColor) {
   ctx.fillRect(0, 0, totalSize, totalSize);
   
   // 绘制二维码（居中，带留白）
-  ctx.drawImage(source, paddingPx, paddingPx, 256, 256);
+  ctx.drawImage(source, paddingPx, paddingPx, 271, 271);
 }
 
 // 生成二维码
@@ -951,8 +950,8 @@ async function generateQRCode(panel, url, colorDark = null, colorLight = null, p
       const canvas = document.createElement('canvas');
       canvas.style.width = '100%';
       canvas.style.height = '100%';
-      canvas.style.maxWidth = '256px';
-      canvas.style.maxHeight = '256px';
+      canvas.style.maxWidth = '271px';
+      canvas.style.maxHeight = '271px';
       canvas.style.objectFit = 'contain';
       
       await generateQRCodeWithPadding(canvas, url, colorDark, colorLight, padding);

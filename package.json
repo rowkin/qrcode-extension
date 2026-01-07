@@ -5,9 +5,12 @@
   "main": "background.js",
   "scripts": {
     "clean": "git clean -df && git checkout -- .",
-    "check-git": "node build/check-git-status.js",
+    "check-git": "node scripts/check-git-status.js",
+    "check-node-version": "node -e \"const major = parseInt(process.versions.node.split('.')[0]); if (major < 14) { console.error('❌ Requires Node.js 14+, current:', process.version); process.exit(1); } else { console.log('✅ Node version check passed:', process.version); }\"",
+    "prebuild": "npm run check-git",
     "build": "SRC_DIR=src bash ./scripts/bump_version.sh",
     "build:debug": "SRC_DIR=src bash -x ./scripts/bump_version.sh",
+    "prebuild:pack": "npm run check-git",
     "build:pack": "SRC_DIR=src bash ./scripts/bump_version.sh --pack-only",
     "build:pack:debug": "SRC_DIR=src bash -x ./scripts/bump_version.sh --pack-only",
     "docs:dev": "vitepress dev docs",
@@ -18,9 +21,13 @@
     "docs:deploy:zip": "node scripts/deploy-docs.js zip",
     "docs:deploy:git": "node scripts/deploy-docs.js git",
     "docs:deploy:hook": "bash scripts/deploy-hook.sh",
+    "predocs:deploy:auto": "npm run check-git",
     "docs:deploy:auto": "git push origin env_site && npm run docs:deploy:hook",
     "postinstall": "npm run check-node-version",
-    "check-node-version": "node -e \"if (process.versions.node.split('.')[0] < 14) { console.error('Requires Node.js 14+'); process.exit(1); }\""
+    "docs:sync": "node scripts/sync-changelog.js",
+    "docs:dev:sync": "npm run docs:sync && npm run docs:dev",
+    "predocs:build:sync": "npm run check-git",
+    "docs:build:sync": "npm run docs:sync && npm run docs:build"
   },
   "keywords": [
     "chrome-extension",

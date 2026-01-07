@@ -18,6 +18,7 @@ export default defineConfig({
       { text: '快速开始', link: '/guide/getting-started' },
       { text: '功能特性', link: '/guide/features' },
       { text: '使用指南', link: '/guide/usage' },
+      { text: '更新日志', link: '/guide/changelog' },
       { text: '技术文档', link: '/guide/technical' },
       { text: '常见问题', link: '/guide/faq' },
     ],
@@ -37,6 +38,7 @@ export default defineConfig({
           items: [
             { text: '技术文档', link: '/guide/technical' },
             { text: '常见问题', link: '/guide/faq' },
+            { text: '更新日志', link: '/guide/changelog' },
           ]
         }
       ]
@@ -48,7 +50,7 @@ export default defineConfig({
 
     footer: {
       message: '基于 MIT 许可证发布',
-      copyright: 'Copyright © 2024 mdsfe'
+      copyright: 'Copyright © 2025 mdsfe'
     },
 
     search: {

@@ -12,6 +12,8 @@ function createContextMenu() {
       title: chrome.i18n.getMessage("contextMenuParent"),
       contexts: ["page", "selection", "link", "image"]
     });
+
+    let 测试翻译
     
     // 创建"生成二维码"子菜单
     chrome.contextMenus.create({
